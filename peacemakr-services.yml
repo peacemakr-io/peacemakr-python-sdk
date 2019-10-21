@@ -1,0 +1,1441 @@
+swagger: '2.0'
+info:
+  description: >-
+    This API describes the Peacemakr services, which enable seamless application layer encryption and verification.
+  version: 1.0.0
+  title: Peacemakr
+  termsOfService: 'http://api.peacemakr.io'
+host: api.peacemakr.io
+basePath: /api/v1
+securityDefinitions:
+  basic:
+    type: basic
+  header:
+    type: apiKey
+    in: header
+    name: authorization
+tags:
+  - name: Login
+    description: OAuth2 login related endpoints
+  - name: Org
+    description: Create, update, or delete an organization
+  - name: Client
+    description: Register, update, or delete a client
+  - name: CryptoConfig
+    description: Update cryptographic settings
+  - name: KeyService
+    description: Save or load wrapped symmetric keys
+  - name: KeyDerivationServiceRegistry
+    description: Register, lookup, or disband key derivation services
+  - name: ServerManagement
+  - name: PhoneHome
+schemes:
+  - http
+paths:
+  /health:
+    get:
+      tags:
+      - ServerManagement
+      summary: See if the server is healthy
+      description: Returns 200 if the server is healthy
+      responses:
+        '200':
+          description: Everythings fine.
+
+  /log:
+    post:
+      tags:
+      - PhoneHome
+      security:
+        - header: []
+      summary: Used to report back to server a logged event
+      description: Returns 200 ok if successfully persisted
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: log
+          required: true
+          schema:
+            $ref: '#/definitions/Log'
+      responses:
+        '200':
+          description: Log event successfully ingested
+        '400':
+          description: Log event unsuccessfully ingested
+        '401':
+          description: Unauthorized request
+
+  /login:
+    get:
+      tags:
+        - Login
+      summary: After aquiring and OAuth2 openId id_token from IdP (like google login), present it here and proceed with the required flow.  If this is a new user, they'll have to create an org, else, they will just get their org details, and an APIKey associated with their org.
+      operationId: login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: id_token
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns a LoginResponse, which helps the calling client determine what screen to load next (create org vs current org).
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        '401':
+          description: Not authenticated (user not who they say they are)
+        '403':
+          description: Not authorized (user not permitted to do that)
+  /login/inviteUser:
+    post:
+      tags:
+        - Login
+      security:
+      - header: []
+      summary: Invite (bind) an existing user that is not already bound to an org, to your org
+      operationId: loginInviteUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: email
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '401':
+          description: Not authenticated (user not who they say they are)
+        '403':
+          description: Not authorized (user not permitted to do that)
+    delete:
+      tags:
+        - Login
+      security:
+      - header: []
+      summary: Uninvite (remove) an existing user that is part of your org
+      operationId: loginUninviteUser
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: email
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful
+        '401':
+          description: Not authenticated (user not who they say they are)
+        '403':
+          description: Not authorized (user not permitted to do that)
+
+  /org:
+    post:
+      security:
+        - header: []
+      tags:
+        - Org
+      summary: Create a new organization. Must be an authenticated request with a valid id_token from a trusted IdP.
+      operationId: addOrganization
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: id_token
+          required: true
+          type: string
+        - in: query
+          name: stripeCustomerId
+          required: true
+          type: string
+        - in: query
+          name: orgName
+          required: true
+          type: string
+        - in: body
+          name: contact
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        '200':
+          description: Successful construction of an organization. Returns the actual organization which was registered. (Org includes an APIToken)
+          schema:
+            $ref: '#/definitions/Organization'
+        '400':
+          description: Unable to process request
+  /org/{orgId}:
+    get:
+      security:
+        - header: []
+      tags:
+        - Org
+      summary: Get an existing organization
+      operationId: getOrganization
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the Org requested
+          schema:
+            $ref: '#/definitions/Organization'
+        '400':
+          description: Unable to process request
+    delete:
+      security:
+        - header: []
+      tags:
+        - Org
+      summary: Remove an existing organization
+      operationId: deleteOrganization
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful deletion of an existing organization.
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+  /org/key/{apikey}:
+    get:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Get an existing Organization
+      operationId: getOrganizationFromAPIKey
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: apikey
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Returns the Org requested
+          schema:
+            $ref: '#/definitions/Organization'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+    delete:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Remove an existing API Key
+      operationId: deleteAPIKeyFromOrg
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: apikey
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful deletion of an existing API key.
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+  /org/key/test:
+    get:
+      tags:
+        - Org
+      summary: Get an ephemeral test org api key
+      operationId: getTestOrganizationAPIKey
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Returns an apikey for a test org
+          schema:
+            $ref: '#/definitions/APIKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+        '500':
+          description: Unrecoverable internal server error
+  /org/key/sharedCloud:
+    get:
+      security:
+        - header: []
+      tags:
+        - Org
+      summary: Get an access key for the peacemakr shared cloud org (all cloud key derivers must use this)
+      operationId: getCloudOrganizationAPIKey
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Returns an apikey for a cloud org
+          schema:
+            $ref: '#/definitions/APIKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+        '403':
+          description: Not authorized to perform request
+        '500':
+          description: Unrecoverable internal server error
+  /org/key:
+    post:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Add a new API Key to an org
+      operationId: addAPIKeyToOrg
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Successful addition of an API Key to its org
+          schema:
+            $ref: '#/definitions/APIKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+  /org/admin/{email}:
+    delete:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Remove an existing admin from the org (You can not remove the last admin. It will faile with a Bad Request response.)
+      operationId: deleteAdminFromOrg
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: email
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successful deletion of an existing admin from org.
+        '400':
+          description: Unable to process request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Not authenticated to perform request
+        '500':
+          description: Unrecoverable error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /org/admin:
+    post:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Add a new admin to this org
+      operationId: addAdminToOrg
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: contact
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        '200':
+          description: Successful addition of a new admin to this org
+          schema:
+            $ref: '#/definitions/Contact'
+        '400':
+          description: Unable to process request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Not authenticated to perform request
+        '500':
+          description: Unrecoverable error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /org/stripeId:
+    post:
+      security:
+      - header: []
+      tags:
+      - Org
+      summary: Update the stripe customer Id associated with this account
+      operationId: updateStripeCustomerId
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: stripeCustomerId
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Successfully updated stripe customer id
+          schema:
+            $ref: '#/definitions/APIKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated to perform request
+
+  /client:
+    post:
+      security:
+        - header: []
+      tags:
+        - Client
+      summary: Register a new client
+      operationId: addClient
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: client
+          required: true
+          schema:
+            $ref: '#/definitions/Client'
+      responses:
+        '200':
+          description: Successful registration of a new client.
+          schema:
+            $ref: '#/definitions/Client'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+  '/client/{clientId}':
+    get:
+      security:
+        - header: []
+      tags:
+        - Client
+      summary: Get an existing client
+      operationId: getClient
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the client requested
+          schema:
+            $ref: '#/definitions/Client'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+    delete:
+      security:
+        - header: []
+      tags:
+        - Client
+      summary: Remove an existing organization
+      operationId: deleteClient
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful update of an existing client.
+          schema:
+            $ref: '#/definitions/Client'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+  '/client/{clientId}/addPublicKey':
+    post:
+      security:
+        - header: []
+      tags:
+        - Client
+      summary: Register a new public key for the client
+      operationId: addClientPublicKey
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          type: string
+        - in: body
+          name: newPublicKey
+          required: true
+          schema:
+            $ref: '#/definitions/PublicKey'
+      responses:
+        '200':
+          description: Public key for the client successfully added
+          schema:
+            $ref: '#/definitions/PublicKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+# See:
+# get /crypto/asymmetric/{keyID}
+# for public key retrieval
+
+  '/crypto/config/{cryptoConfigId}':
+    get:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Get the crypto configurations
+      operationId: getCryptoConfig
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cryptoConfigId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the requested configuration
+          schema:
+            $ref: '#/definitions/CryptoConfig'
+        '400':
+          description: Unable to process request
+    post:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Update the crypto configuration, ONLY the clientKeyType clientKeyBitlength, and clientKeyTTL fields.
+      operationId: updateCryptoConfig
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cryptoConfigId
+          required: true
+          type: string
+        - in: body
+          name: updatedCryptoConfig
+          required: true
+          schema:
+            $ref: '#/definitions/CryptoConfig'
+      responses:
+        '200':
+          description: Returns the requested configuration
+          schema:
+            $ref: '#/definitions/CryptoConfig'
+        '400':
+          description: Unable to process request
+  '/crypto/config/{cryptoConfigId}/domainSelectorScheme':
+    put:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Update an existing crypto config's domainSelectorScheme
+      operationId: updateCryptoConfigSelectorScheme
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cryptoConfigId
+          required: true
+          type: string
+        - in: query
+          name: newSelectorScheme
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfully updated the crypto config
+        '400':
+          description: Unable to process request
+  '/crypto/config/{cryptoConfigId}/useDomain':
+    post:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Add a new active use domain and attached it to the crypto config.
+      operationId: addUseDomain
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cryptoConfigId
+          required: true
+          type: string
+        - in: body
+          name: newUseDomain
+          required: true
+          schema:
+            $ref: '#/definitions/SymmetricKeyUseDomain'
+      responses:
+        '200':
+          description: Successfully add the new use domain to the crypto config overrides the id due to object creation
+          schema:
+            $ref: '#/definitions/SymmetricKeyUseDomain'
+        '400':
+          description: Unable to process request
+  '/crypto/config/{cryptoConfigId}/useDomain/{useDomainId}':
+    post:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Add an existing use domain to another crypto config.
+      operationId: addExistingUseDomain
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: cryptoConfigId
+          required: true
+          type: string
+        - in: path
+          name: useDomainId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfully add the existing use domain to the crypto config
+        '400':
+          description: Unable to process request
+  '/crypto/useDomain/{useDomainId}':
+    delete:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Delete a fully expired use domain
+      operationId: removeUseDomain
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: useDomainId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfully expired use doamin.
+        '400':
+          description: Unable to process request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Not authenticated to perform request
+        '403':
+          description: Not authorized to perform request
+        '500':
+          description: Unrecoverable internal error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  '/crypto/useDomain/{useDomainId}/rapidRotation':
+    post:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Rapid expiration of existing use doamin and immediately replacment with an identical use domain containing fresh keys
+      operationId: rapidRotationUseDomain
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: useDomainId
+          required: true
+          type: string
+        - in: query
+          name: optionalNextKeyDerivationServiceId
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Successfully rotated this use doamin
+        '400':
+          description: Unable to process request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Not authenticated to perform request
+        '403':
+          description: Not authorized to perform request
+        '500':
+          description: Unrecoverable internal error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  '/crypto/useDomain/{useDomainId}/updateExpire':
+    post:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Chnage expiration of a use domain
+      operationId: updateExpireUseDomain
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: useDomainId
+          required: true
+          type: string
+        - in: query
+          name: inceptionTTL
+          required: true
+          type: integer
+        - in: query
+          name: encryptionTTL
+          required: true
+          type: integer
+        - in: query
+          name: decryptionTTL
+          required: true
+          type: integer
+        - in: query
+          name: retentionTTL
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Successfully expired use doamin.
+        '400':
+          description: Unable to process request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Not authenticated to perform request
+        '403':
+          description: Not authorized to perform request
+        '500':
+          description: Unrecoverable internal error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  '/crypto/useDomain/{useDomainId}/enableKDSFallbackToCloud':
+    put:
+      security:
+        - header: []
+      tags:
+        - CryptoConfig
+      summary: Update an existing crypto config's asymmetricKeyTTL
+      operationId: updateCryptoConfigFallbackToCloud
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: useDomainId
+          required: true
+          type: string
+        - in: query
+          name: fallbackToCloud
+          required: true
+          type: boolean
+      responses:
+        '200':
+          description: Successfully updated the fallback to cloud setting on use domain
+        '400':
+          description: Unable to process request
+
+  '/crypto/symmetric/{encryptingKeyId}':
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyService
+      summary: Get all encrypted symmetric keys that are encrypted with this encrypting keyId, optionally limiting the request to a set of symmetric key domains
+      operationId: getAllEncryptedKeys
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: encryptingKeyId
+          required: true
+          type: string
+        - in: query
+          name: symmetricKeyIds
+          required: false
+          type: array
+          items:
+            type: string
+      responses:
+        '200':
+          description: Returns an array of encrypted keys
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EncryptedSymmetricKey'
+        '400':
+          description: Unable to process request
+    post:
+      security:
+        - header: []
+      tags:
+        - KeyService
+      summary: Add a new encrypted key. The encrypting key that protects the encrypted key is identified with encryptingKeyId. Request must come from a registered key manager.
+      operationId: postNewEncryptedKeys
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: encryptingKeyId
+          required: true
+          type: string
+        - in: body
+          required: true
+          name: EncryptedSymmetricKey
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EncryptedSymmetricKey'
+      responses:
+        '200':
+          description: Successfully persist the encrypted symmetric keys
+        '400':
+          description: Unable to process request
+  '/crypto/asymmetric/{keyID}':
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyService
+      summary: Get the public key associated with the passed-in key ID
+      operationId: getPublicKey
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: keyID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns a public key in PEM format
+          schema:
+            $ref: '#/definitions/PublicKey'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+
+
+  '/crypto/deriver/instance':
+    post:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Register a new KeyDerivationServiceInstance
+      operationId: addKeyDerivationServiceInstance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: keyDerivationInstance
+          required: false
+          schema:
+            $ref: '#/definitions/KeyDerivationInstance'
+      responses:
+        '200':
+          description: Returns the newly registered key derivation service instance
+          schema:
+            $ref: '#/definitions/KeyDerivationInstance'
+        '400':
+          description: Unable to process request
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not authorized
+        '500':
+          description: Internal server error
+  '/crypto/deriver/instance/{keyDerivationInstanceId}':
+    delete:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Activate or deactivate an existing KeyDerivationServiceInstance
+      operationId: deleteKeyDerivationServiceInstance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: keyDerivationInstanceId
+          required: true
+          type: string
+        - in: query
+          name: active
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Update successful
+        '400':
+          description: Unable to process request
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Get the keyderiver details by id
+      operationId: getKeyDerivationServiceInstance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: keyDerivationInstanceId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Requested key deriver found, details returned.
+          schema:
+            $ref: '#/definitions/KeyDerivationInstance'
+        '400':
+          description: Unable to process request.
+  '/crypto/deriver/instance/{keyDerivationInstanceId}/heartbeat':
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Heatbeat from the given key derivation service instance
+      operationId: heartbeatKeyDerivationServiceInstance
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: keyDerivationInstanceId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Heatbeat accepted, possibly returning work
+          schema:
+            $ref: '#/definitions/HeatbeatResponse'
+        '400':
+          description: Unable to process request
+  '/crypto/deriver/all-org-instances':
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Get the all key derivers registerd to org
+      operationId: getAllOrgKeyDerivationServiceInstances
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Get all registred key derivers associated with org
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/KeyDerivationInstance'
+        '400':
+          description: Unable to process request.
+        '401':
+          description: Not Authenticated
+        '500':
+          description: Unrecoverable internal server error
+  '/crypto/deriver/all-shared-instances':
+    get:
+      security:
+        - header: []
+      tags:
+        - KeyDerivationServiceRegistry
+      summary: Get the all key derivers that the org has access to - including shared cloud instances
+      operationId: getAllSharedKeyDerivationServiceInstances
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Get all registered public key derivers - including shared cloud instances
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/KeyDerivationInstance'
+        '400':
+          description: Unable to process request.
+        '401':
+          description: Not Authenticated
+        '500':
+          description: Unrecoverable internal server error
+
+
+
+definitions:
+
+  LoginResponse:
+    type: object
+    properties:
+      mustCreateOrg:
+        type: boolean
+        description: "if true, then the user is not attached to an existing org, and must create a new org"
+      messageOftheDay:
+        type: string
+        description: "if set, please display this message to the user on login"
+      Org:
+        $ref: '#/definitions/Organization'
+
+  Organization:
+    type: object
+    required:
+      - id
+      - name
+      - contacts
+      - stripeCustomerId
+      - clientIds
+      - apiKeys
+      - cryptoConfigId
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      contacts:
+        type: array
+        items:
+          $ref: '#/definitions/Contact'
+      stripeCustomerId:
+        type: string
+        description: Identifies the the customer in Stripe associated with this org
+      clientIds:
+        type: array
+        description: Array of client id's registered to this org
+        items:
+          type: string
+      apiKeys:
+        type: array
+        description: Array of api keys registered to this org
+        items:
+          $ref: '#/definitions/APIKey'
+      cryptoConfigId:
+        type: string
+        description: cryptoconfigId of this org
+
+  APIKey:
+    type: object
+    required:
+      - key
+      - orgId
+    properties:
+      key:
+        type: string
+      orgId:
+        type: string
+      creationTime:
+        type: integer
+      authorizedUseDomains:
+        type: array
+        description: list of useDomains that APIKey has access to
+        items:
+          type: string
+      creator:
+        $ref: '#/definitions/Contact'
+
+  Log:
+    type: object
+    required:
+      - clientId
+      - event
+    properties:
+      clientId:
+        type: string
+      event:
+        type: string
+
+  Contact:
+    type: object
+    required:
+      - name
+      - email
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+
+  Client:
+    type: object
+    required:
+      - id
+      - publicKeys
+    properties:
+      id:
+        type: string
+      sdk:
+        type: string
+      preferredPublicKeyId:
+        type: string
+        description: of all the public keys KeyDeriver's should deliver to this public key - it is also the most recently added public key
+      publicKeys:
+        type: array
+        items:
+          $ref: '#/definitions/PublicKey'
+
+  CryptoConfig:
+    type: object
+    required:
+      - id
+      - symmetricKeyUseDomains
+      - symmetricKeyUseDomainSelectorScheme
+      - ownerOrgId
+      - clientKeyType
+      - clientKeyBitlength
+      - clientKeyTTL
+    properties:
+      id:
+        type: string
+      symmetricKeyUseDomains:
+        description: every application layer encryption must select a key to use from one specific active semmetric key encryption domain. this is an array of encryption domains id's that are currently available for encryption
+        type: array
+        items:
+          $ref: '#/definitions/SymmetricKeyUseDomain'
+      symmetricKeyUseDomainSelectorScheme:
+        description: to guide SDK's on how to select an encryption domain, a selectorScheme helps an SDK map a encryption request to a set of keys and encryption algoritm
+        example: "moduloIdentifier"
+        type: string
+      ownerOrgId:
+        description: the org id of the organization that owns these symmetric keys
+        type: string
+      clientKeyType:
+        description: the type of key that should be associated with clients, for example, rsa
+        type: string
+      clientKeyBitlength:
+        description: the bit length of all new client keys, for example, 2048
+        type: integer
+      clientKeyTTL:
+        description: the TTL on the client's local asymetric key
+        type: integer
+
+
+  SymmetricKeyUseDomain:
+    type: object
+    required:
+      - id
+      - ownerOrgId
+      - creationTime
+      - symmetricKeyInceptionTTL
+      - symmetricKeyEncryptionUseTTL
+      - symmetricKeyDecryptionUseTTL
+      - symmetricKeyRetentionUseTTL
+      - symmetricKeyLength
+      - symmetricKeyEncryptionAlg
+      - encryptingPackagedCiphertextVersion
+      - symmetricKeyDerivationServiceId
+      - encryptionKeyIds
+      - endableKDSFallbackToCloud
+      - requireSignedKeyDelivery
+    properties:
+      id:
+        type: string
+      ownerOrgId:
+        description: the org id of the organization that owns these symmetric keys
+        type: string
+      name:
+        type: string
+      creationTime:
+        type: integer
+      symmetricKeyInceptionTTL:
+        description: number of seconds since key creation that the key will be available for encryption
+        type: integer
+      symmetricKeyEncryptionUseTTL:
+        description: number of seconds since key creation that the key will be available for encryption
+        type: integer
+      symmetricKeyEncryptionAllowed:
+        description: whether this use domain is available for encryption; if false, these keys should not be used for encrypting new messages
+        type: boolean
+      symmetricKeyDecryptionUseTTL:
+        description: number of seconds since key creation that the key will be available for decryption
+        type: integer
+      symmetricKeyDecryptionAllowed:
+        description: whether this use domain is available for decryption; if false, these keys should not be used for decrypting messages
+        type: boolean
+      symmetricKeyRetentionUseTTL:
+        description: number of seconds since key creation that the key will be available for retention purposes
+        type: integer
+      symmetricKeyLength:
+        description: the number of bits of all symmetric keys in this use domain
+        type: integer
+      symmetricKeyEncryptionAlg:
+        description: the specific encryption alg to encrypt new plaintexts for application layer encryption operations
+        type: string
+        default: "CHACHA20_POLY1305"
+      encryptingPackagedCiphertextVersion:
+        description: after encrypting new plaintexts, package the ciphertext with this version of the packaged ciphertext
+        type: integer
+      symmetricKeyDerivationServiceId:
+        description: the symmetric key derivation serivce id that can derive and wrap these keys
+        type: string
+      encryptionKeyIds:
+        type: array
+        description: these are the semmetric key id's that belong to this use domain - these keys never belong to any other use domain
+        items:
+          type: string
+      endableKDSFallbackToCloud:
+        description: if all registered kds service become unreachable, then incoming requests for new and existing keys may fallback to the cloud provided KDS
+        type: boolean
+      requireSignedKeyDelivery:
+        description: if required, all clients must receive these keys in a signed symmetric key delivery from the key deriver
+        type: boolean
+      digestAlgorithm:
+        description: The digest algorithm to use for signing messages in this use domain
+        type: string
+        default: "SHA_256"
+
+  EncryptedSymmetricKey:
+    type: object
+    required:
+      - keyIds
+      - keyLength
+      - symmetricKeyUseDomainId
+      - packagedCiphertext
+    properties:
+      keyIds:
+        type: array
+        items:
+          type: string
+        description: id's of the symmetric keys encrypted in packedCiphertext
+      keyLength:
+        type: integer
+        description: length of the keys encrypted in packedCiphertext
+      symmetricKeyUseDomainId:
+        description: id of the symmetric key use domain which contains this key
+        type: string
+      packagedCiphertext:
+        description: the actual packaged ciphertext of the encrypted symmetric key, of key
+        type: string
+
+  PublicKey:
+    type: object
+    required:
+      - id
+      - creationTime
+      - keyType
+      - encoding
+      - key
+    properties:
+      id:
+        type: string
+      creationTime:
+        type: integer
+      keyType:
+        example: "ec"
+        type: string
+      encoding:
+        example: "pem"
+        type: string
+      key:
+        type: string
+      owningClientId:
+        type: string
+        description: the id of the client that owns this specific public key
+      owningOrgId:
+        type: string
+        description: the id of the org that owns the client that owns this specific public key
+
+  KeyDerivationInstance:
+    type: object
+    required:
+      - id
+      - serviceIds
+      - active
+      - version
+    properties:
+      id:
+        description: instance id (concrete instance)
+        type: string
+      serviceIds:
+        description: service id (virtual service id)
+        type: array
+        items:
+          type: string
+      active:
+        description: currently online and accepting requests for key derivation
+        type: boolean
+      version:
+        type: string
+      baseUrl:
+        type: string
+        description: base URL from which this key deriver instance will respond to new key derivation job requests
+      isPublic:
+        type: boolean
+        default: false
+        description: if true then the key deriver is visible to every other organization
+
+  HeatbeatResponse:
+    type: object
+    required:
+      - requests
+    properties:
+      requests:
+        type: array
+        description: an array of symmetri key requests for this ker deriver instance
+        items:
+          $ref: '#/definitions/SymmetricKeyRequest'
+
+  SymmetricKeyRequest:
+    type: object
+    required:
+      - id
+      - deriveSymmetricKeyIds
+      - deliveryPublicKeyIds
+      - keyDerivationServiceId
+      - creationTime
+      - symmetricKeyLength
+      - packagedCiphertextVersion
+      - mustSignDeliveredSymmetricKeys
+    properties:
+      id:
+        type: string
+        description: Id of the symmetric key request.
+      deriveSymmetricKeyIds:
+        type: array
+        description: These are the keyId's of for the symmetric keys to actually derive.
+        items:
+          type: string
+      deliveryPublicKeyIds:
+        type: array
+        description: These are the keyId's to deliver all of the derived symmetric keys.
+        items:
+          type: string
+      keyDerivationServiceId:
+        type: string
+        description: The serviceId that must generate these keys.
+      creationTime:
+        type: integer
+        description: Epoch time of the symmetric key requestion request time.
+      symmetricKeyLength:
+        type: integer
+        description: Length in bytes of the derived symmetric keys.
+      packagedCiphertextVersion:
+        type: integer
+        description: After deriving symmetric keys, this determines the ciphertext packaging scheme required for encrypted key delivery.
+      mustSignDeliveredSymmetricKeys:
+        type: boolean
+        description: If true the key deriver must sign delivered symmetric keys ciphertext blobs
+
+  ErrorResponse:
+    type: object
+    required:
+      - msg
+    properties:
+      msg:
+        type: string
