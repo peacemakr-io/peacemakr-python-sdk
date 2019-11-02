@@ -23,7 +23,7 @@ class PeacemakrCryptoSDK(ABC):
 
     @abstractmethod
     def register(self):
-        """Registers to PeaceMakr as a client.
+        """Registers to Peacemakr as a client.
 
         The persister is used to detect prior registrations on this client, so safe
         to call multiple times. Once a successful invocation of Register is executed once, subsequent calls become a
