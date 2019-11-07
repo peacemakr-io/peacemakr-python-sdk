@@ -5,5 +5,3 @@ docker run --rm -v ${PWD}:/local swaggerapi/swagger-codegen-cli:2.4.5 generate \
     -l python \
     -o local \
     -DpackageName=peacemakr_sdk
-    
-
