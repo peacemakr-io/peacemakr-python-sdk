@@ -16,15 +16,15 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.api.crypto_config_api import CryptoConfigApi  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.api.crypto_config_api import CryptoConfigApi  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestCryptoConfigApi(unittest.TestCase):
     """CryptoConfigApi unit test stubs"""
 
     def setUp(self):
-        self.api = peacemakr_sdk.api.crypto_config_api.CryptoConfigApi()  # noqa: E501
+        self.api = peacemakr_sdk.generated.api.crypto_config_api.CryptoConfigApi()  # noqa: E501
 
     def tearDown(self):
         pass

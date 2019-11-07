@@ -22,7 +22,7 @@ Register a new KeyDerivationServiceInstance
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -32,7 +32,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 key_derivation_instance = peacemakr_sdk.KeyDerivationInstance() # KeyDerivationInstance |  (optional)
 
 try:
@@ -74,7 +74,7 @@ Activate or deactivate an existing KeyDerivationServiceInstance
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -84,7 +84,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 key_derivation_instance_id = 'key_derivation_instance_id_example' # str | 
 active = 'active_example' # str | 
 
@@ -127,7 +127,7 @@ Get the all key derivers registerd to org
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -137,7 +137,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 
 try:
     # Get the all key derivers registerd to org
@@ -175,7 +175,7 @@ Get the all key derivers that the org has access to - including shared cloud ins
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -185,7 +185,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 
 try:
     # Get the all key derivers that the org has access to - including shared cloud instances
@@ -223,7 +223,7 @@ Get the keyderiver details by id
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -233,7 +233,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 key_derivation_instance_id = 'key_derivation_instance_id_example' # str | 
 
 try:
@@ -275,7 +275,7 @@ Heatbeat from the given key derivation service instance
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -285,7 +285,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyDerivationServiceRegistryApi(peacemakr_sdk.generated.ApiClient(configuration))
 key_derivation_instance_id = 'key_derivation_instance_id_example' # str | 
 
 try:

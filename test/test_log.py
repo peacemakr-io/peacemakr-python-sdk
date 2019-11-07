@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.log import Log  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.log import Log  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestLog(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestLog(unittest.TestCase):
     def testLog(self):
         """Test Log"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.log.Log()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.log.Log()  # noqa: E501
         pass
 
 

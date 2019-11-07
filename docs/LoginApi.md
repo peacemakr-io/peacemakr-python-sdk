@@ -19,7 +19,7 @@ After aquiring and OAuth2 openId id_token from IdP (like google login), present 
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # create an instance of the API class
@@ -65,7 +65,7 @@ Invite (bind) an existing user that is not already bound to an org, to your org
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -75,7 +75,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.generated.ApiClient(configuration))
 email = 'email_example' # str | 
 
 try:
@@ -116,7 +116,7 @@ Uninvite (remove) an existing user that is part of your org
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -126,7 +126,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.generated.ApiClient(configuration))
 email = 'email_example' # str | 
 
 try:

@@ -16,15 +16,15 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.api.key_derivation_service_registry_api import KeyDerivationServiceRegistryApi  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.api.key_derivation_service_registry_api import KeyDerivationServiceRegistryApi  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestKeyDerivationServiceRegistryApi(unittest.TestCase):
     """KeyDerivationServiceRegistryApi unit test stubs"""
 
     def setUp(self):
-        self.api = peacemakr_sdk.api.key_derivation_service_registry_api.KeyDerivationServiceRegistryApi()  # noqa: E501
+        self.api = peacemakr_sdk.generated.api.key_derivation_service_registry_api.KeyDerivationServiceRegistryApi()  # noqa: E501
 
     def tearDown(self):
         pass

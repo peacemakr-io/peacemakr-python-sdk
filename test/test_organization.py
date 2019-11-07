@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.organization import Organization  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.organization import Organization  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestOrganization(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestOrganization(unittest.TestCase):
     def testOrganization(self):
         """Test Organization"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.organization.Organization()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.organization.Organization()  # noqa: E501
         pass
 
 

@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.error_response import ErrorResponse  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.error_response import ErrorResponse  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestErrorResponse(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestErrorResponse(unittest.TestCase):
     def testErrorResponse(self):
         """Test ErrorResponse"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.error_response.ErrorResponse()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.error_response.ErrorResponse()  # noqa: E501
         pass
 
 

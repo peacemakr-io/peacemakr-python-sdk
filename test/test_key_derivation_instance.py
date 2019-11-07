@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.key_derivation_instance import KeyDerivationInstance  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.key_derivation_instance import KeyDerivationInstance  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestKeyDerivationInstance(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestKeyDerivationInstance(unittest.TestCase):
     def testKeyDerivationInstance(self):
         """Test KeyDerivationInstance"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.key_derivation_instance.KeyDerivationInstance()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.key_derivation_instance.KeyDerivationInstance()  # noqa: E501
         pass
 
 

@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.client import Client  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.client import Client  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestClient(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestClient(unittest.TestCase):
     def testClient(self):
         """Test Client"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.client.Client()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.client.Client()  # noqa: E501
         pass
 
 

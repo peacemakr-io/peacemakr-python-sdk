@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.symmetric_key_use_domain import SymmetricKeyUseDomain  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.symmetric_key_use_domain import SymmetricKeyUseDomain  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestSymmetricKeyUseDomain(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestSymmetricKeyUseDomain(unittest.TestCase):
     def testSymmetricKeyUseDomain(self):
         """Test SymmetricKeyUseDomain"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.symmetric_key_use_domain.SymmetricKeyUseDomain()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.symmetric_key_use_domain.SymmetricKeyUseDomain()  # noqa: E501
         pass
 
 

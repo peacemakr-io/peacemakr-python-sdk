@@ -16,8 +16,8 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.models.encrypted_symmetric_key import EncryptedSymmetricKey  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.models.encrypted_symmetric_key import EncryptedSymmetricKey  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestEncryptedSymmetricKey(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestEncryptedSymmetricKey(unittest.TestCase):
     def testEncryptedSymmetricKey(self):
         """Test EncryptedSymmetricKey"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.models.encrypted_symmetric_key.EncryptedSymmetricKey()  # noqa: E501
+        # model = peacemakr_sdk.generated.models.encrypted_symmetric_key.EncryptedSymmetricKey()  # noqa: E501
         pass
 
 

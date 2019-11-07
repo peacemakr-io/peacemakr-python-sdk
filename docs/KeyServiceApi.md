@@ -19,7 +19,7 @@ Get all encrypted symmetric keys that are encrypted with this encrypting keyId, 
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -29,7 +29,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.generated.ApiClient(configuration))
 encrypting_key_id = 'encrypting_key_id_example' # str | 
 symmetric_key_ids = ['symmetric_key_ids_example'] # list[str] |  (optional)
 
@@ -73,7 +73,7 @@ Get the public key associated with the passed-in key ID
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -83,7 +83,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.generated.ApiClient(configuration))
 key_id = 'key_id_example' # str | 
 
 try:
@@ -125,7 +125,7 @@ Add a new encrypted key. The encrypting key that protects the encrypted key is i
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -135,7 +135,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.ApiClient(configuration))
+api_instance = peacemakr_sdk.KeyServiceApi(peacemakr_sdk.generated.ApiClient(configuration))
 encrypting_key_id = 'encrypting_key_id_example' # str | 
 encrypted_symmetric_key = [peacemakr_sdk.EncryptedSymmetricKey()] # list[EncryptedSymmetricKey] | 
 

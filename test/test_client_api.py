@@ -16,15 +16,15 @@ from __future__ import absolute_import
 import unittest
 
 import peacemakr_sdk
-from peacemakr_sdk.api.client_api import ClientApi  # noqa: E501
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.api.client_api import ClientApi  # noqa: E501
+from peacemakr_sdk.generated.rest import ApiException
 
 
 class TestClientApi(unittest.TestCase):
     """ClientApi unit test stubs"""
 
     def setUp(self):
-        self.api = peacemakr_sdk.api.client_api.ClientApi()  # noqa: E501
+        self.api = peacemakr_sdk.generated.api.client_api.ClientApi()  # noqa: E501
 
     def tearDown(self):
         pass

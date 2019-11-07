@@ -19,7 +19,7 @@ Returns 200 if the server is healthy
 from __future__ import print_function
 import time
 import peacemakr_sdk
-from peacemakr_sdk.rest import ApiException
+from peacemakr_sdk.generated.rest import ApiException
 from pprint import pprint
 
 # create an instance of the API class
