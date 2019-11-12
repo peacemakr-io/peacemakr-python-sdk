@@ -3,7 +3,7 @@ from peacemakr_sdk.factory import Factory
 from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 
 def main():
-    api_key = "Zf4LOuonAJnvJkctK8kKdlI5jCh3d8l5flVpWrzxGHw="
+    api_key = "/ZW/VzgAgLjGfORzyEuWPxkp8O37hgzkU+uXGbc8Dtw="
     persister = InMemoryPersister()
 
     sdk = Factory().get_crypto_sdk(api_key=api_key,

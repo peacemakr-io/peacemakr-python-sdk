@@ -163,8 +163,7 @@ class Organization(object):
         :type: str
         """
         if stripe_customer_id is None:
-            self._stripe_customer_id = ""
-            # raise ValueError("Invalid value for `stripe_customer_id`, must not be `None`")  # noqa: E501
+            raise ValueError("Invalid value for `stripe_customer_id`, must not be `None`")  # noqa: E501
 
         self._stripe_customer_id = stripe_customer_id
 

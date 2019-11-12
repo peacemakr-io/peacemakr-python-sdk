@@ -58,6 +58,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         org_api = OrgApi(api_client=api_client)
 
         self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
+        print(self.org)
            
     def _load_crypto_config(self, api_client):
         # TODO: add exception
