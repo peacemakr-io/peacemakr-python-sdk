@@ -11,8 +11,16 @@ import peacemakr_core_crypto_python as p
 
 import time
 
-PERSISTER_PREFERRED_KEY_ID = ""
-PERSISTER_CLIENTID_KEY = ""
+
+PYTHON_SDK_VERSION = "0.0.1"
+PERSISTER_PRIV_KEY = "Priv"
+PERSISTER_PUB_KEY = "Pub"
+PERSISTER_ASYM_TYPE = "AsymmetricKeyType"
+PERSISTER_ASYM_CREATED_DATE_EPOCH = "AsymmetricKeyCreated"
+PERSISTER_ASYM_BITLEN = "AsymmetricKeyBitlen"
+PERSISTER_CLIENTID_KEY = "ClientId"
+PERSISTER_PREFERRED_KEYID = "PreferredKeyId"
+PERSISTER_APIKEY_KEY = "ApiKey"
 
 DEFAULT_SYMM_CIPHER = p.SymmetricCipher.CHACHA20_POLY1305
 
@@ -21,55 +29,57 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __init__(self, api_key="", client_name="", peacemakr_hostname="", persister=None, logger=None):
         self.api_key = api_key
         self.client_name = client_name
-        self.sdk_version = 0
+        self.sdk_version = "0.0.1"
         self.peacemakr_hostname = peacemakr_hostname
         self.org = None
         self.crypto_config = None
         self.persister = persister
         self.logger = logger
+        self.client = None
 
         # private vars
-        self._client = None
-        self._api_client = None
-        self._authentication = None
-        self._loaded_private_preferred_key = None
-        self._loaded_private_preferred_cipher = None
+        self.__api_client = None
+        self.__authentication = None
+        self.__loaded_private_preferred_key = None
+        self.__loaded_private_preferred_cipher = None
 
     # Register, Boostrap
-    def _is_registered(self):
+    def __is_registered(self):
         ## TODO: save things to persister
-        return False
+        return  self.persister.exists(PERSISTER_PREFERRED_KEYID)\
+            and self.persister.exists(PERSISTER_CLIENTID_KEY)\
+            and self.persister.exists(PERSISTER_PRIV_KEY)\
+            and self.persister.exists(PERSISTER_PUB_KEY)\
+            and self.persister.exists(PERSISTER_ASYM_TYPE)
 
-    def _is_boostrapped(self):
-        return self.org != None and self.crypto_config != None and self._client != None
+    def __is_boostrapped(self):
+        return self.org != None and self.crypto_config != None and self.client != None
 
-    def _do_boostrap_org_and_crypto_config(self):
+    def __do_boostrap_org_and_crypto_config(self):
         # set up org, api_client, and crypto_config
-        if self._is_boostrapped():
+        if self.__is_boostrapped():
             return
 
-        api_client = self._get_client()
+        api_client = self.__get_client()
         
-        self._load_org(api_client)
-        self._load_crypto_config(api_client)
+        self.__load_org(api_client)
+        self.__load_crypto_config(api_client)
 
-    def _load_org(self, api_client):
+    def __load_org(self, api_client):
         # TODO: add exception
         org_api = OrgApi(api_client=api_client)
-
         self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
-        print(self.org)
            
-    def _load_crypto_config(self, api_client):
+    def __load_crypto_config(self, api_client):
         # TODO: add exception
         crypto_config_api = CryptoConfigApi(api_client=api_client)
         self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
 
-    def _get_client(self):
+    def __get_client(self):
         ''' set up api client
         '''
-        if self._api_client != None:
-            return self._api_client
+        if self.__api_client != None:
+            return self.__api_client
         
         if self.api_key == "":
             # raise Exception
@@ -78,28 +88,40 @@ class CryptoImpl(PeacemakrCryptoSDK):
         configuration = Configuration()
         configuration.api_key['authorization'] = self.api_key
         configuration.host = self.peacemakr_hostname + "/api/v1"
-        self._api_client = ApiClient(configuration=configuration)
+        self.__api_client = ApiClient(configuration=configuration)
         
         # persister save api key
 
-        return self._api_client
+        return self.__api_client
 
     # Key Related functions
-    def _gen_new_asymmetric_keypair(self, persister):
+    def __gen_new_asymmetric_keypair(self, persister):
         rand = p.RandomDevice()
 
         symm_cipher = DEFAULT_SYMM_CIPHER
-        asymm_cipher = self._get_asymmetric_cipher(self.crypto_config.client_key_type, self.crypto_config.client_key_bitlength)
+        asymm_cipher = self.__get_asymmetric_cipher(self.crypto_config.client_key_type, self.crypto_config.client_key_bitlength)
 
         key = p.Key(asymm_cipher, symm_cipher, rand)
 
         pub_pem = key.get_pub_pem()
+        priv_pem = key.get_priv_pem()
 
-        pub_key = PublicKey(id="", key=pub_pem, creation_time=int(round(time.time())), key_type=self.crypto_config.client_key_type, encoding="pem")
+        created_time = int(round(time.time()))
+        pub_key = PublicKey(id="", 
+                            key=pub_pem, 
+                            creation_time=created_time, 
+                            key_type=self.crypto_config.client_key_type, 
+                            encoding="pem")
+
+        persister.save(PERSISTER_PRIV_KEY, priv_pem)
+        persister.save(PERSISTER_PUB_KEY, pub_pem)
+        persister.save(PERSISTER_ASYM_TYPE, self.crypto_config.client_key_type)
+        persister.save(PERSISTER_ASYM_CREATED_DATE_EPOCH, created_time)
+        persister.save(PERSISTER_ASYM_BITLEN, self.crypto_config.client_key_bitlength)
 
         return pub_key
 
-    def _get_asymmetric_cipher(self, key_type, bit_length):
+    def __get_asymmetric_cipher(self, key_type, bit_length):
         prefix_dict = {
             "ec" : "ECDH_P",
             "rsa": "RSA_"
@@ -121,28 +143,32 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def register(self):
-
         # check is register and is boostrap, if not initialize
-        if self._is_registered():
-            if not self._is_boostrapped:
-                self._do_boostrap_org_and_crypto_config()
+        if self.__is_registered():
+            if not self.__is_boostrapped:
+                self.__do_boostrap_org_and_crypto_config()
             return
         
 
-        self._do_boostrap_org_and_crypto_config()
+        self.__do_boostrap_org_and_crypto_config()
         # generate new asymmetric client keypair and then store info in persistor
-        pub_key = self._gen_new_asymmetric_keypair(self.persister)
+        pub_key = self.__gen_new_asymmetric_keypair(self.persister)
 
         # generate new client with empty id and client public key
-        client = Client(id = "", public_keys=[pub_key])
+        client = Client(id = "", public_keys=[pub_key], sdk=self.sdk_version)
 
-        client_api = ClientApi(api_client=self._get_client())
+        client_api = ClientApi(api_client=self.__get_client())
 
         # try:
         new_client = client_api.add_client(client)
         #except someException
 
-        self._client = new_client
+        self.__client = new_client
+
+        self.persister.save(PERSISTER_CLIENTID_KEY, self.__client.id)
+        self.persister.save(PERSISTER_PREFERRED_KEYID, self.__client.public_keys[0].id)
+
+        # self.persister.debug() # prints all info in the persister
 
         # save info in persister
 
