@@ -42,7 +42,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
-*,cover
+*.cover
 .hypothesis/
 venv/
 .python-version
@@ -62,3 +62,6 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# swagger ignore
+.swagger-codegen-ignore
