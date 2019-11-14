@@ -52,16 +52,16 @@ class CryptoImpl(PeacemakrCryptoSDK):
             and self.persister.exists(PERSISTER_PUB_KEY)\
             and self.persister.exists(PERSISTER_ASYM_TYPE)
 
-    def __is_boostrapped(self):
+    def __is_bootstrapped(self):
         return self.org != None and self.crypto_config != None and self.client != None
 
-    def __do_boostrap_org_and_crypto_config(self):
+    def __do_bootstrap_org_and_crypto_config(self):
         # set up org, api_client, and crypto_config
-        if self.__is_boostrapped():
+        if self.__is_bootstrapped():
             return
 
         api_client = self.__get_client()
-        
+
         self.__load_org(api_client)
         self.__load_crypto_config(api_client)
 
@@ -69,7 +69,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # TODO: add exception
         org_api = OrgApi(api_client=api_client)
         self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
-           
+
     def __load_crypto_config(self, api_client):
         # TODO: add exception
         crypto_config_api = CryptoConfigApi(api_client=api_client)
@@ -80,16 +80,16 @@ class CryptoImpl(PeacemakrCryptoSDK):
         '''
         if self.__api_client != None:
             return self.__api_client
-        
+
         if self.api_key == "":
             # raise Exception
-            return None 
+            return None
 
         configuration = Configuration()
         configuration.api_key['authorization'] = self.api_key
         configuration.host = self.peacemakr_hostname + "/api/v1"
         self.__api_client = ApiClient(configuration=configuration)
-        
+
         # persister save api key
 
         return self.__api_client
@@ -107,10 +107,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
         priv_pem = key.get_priv_pem()
 
         created_time = int(round(time.time()))
-        pub_key = PublicKey(id="", 
-                            key=pub_pem, 
-                            creation_time=created_time, 
-                            key_type=self.crypto_config.client_key_type, 
+        pub_key = PublicKey(id="",
+                            key=pub_pem,
+                            creation_time=created_time,
+                            key_type=self.crypto_config.client_key_type,
                             encoding="pem")
 
         persister.save(PERSISTER_PRIV_KEY, priv_pem)
@@ -139,18 +139,19 @@ class CryptoImpl(PeacemakrCryptoSDK):
         asymm_key = '{}{}'.format(prefix, bit_length)
 
         return asymm_dict[asymm_key]
-        
 
+    def __verify_bootstrapped_and_registered(self):
+        # FIXME: the exception needs to be peacemakr specific
+        if not (self.__is_registered() and self.__is_bootstrapped()):
+            raise Exception("SDK was not registered, please register before using other SDK operations.")
 
     def register(self):
         # check is register and is boostrap, if not initialize
-        if self.__is_registered():
-            if not self.__is_boostrapped:
-                self.__do_boostrap_org_and_crypto_config()
-            return
-        
+        try:
+            self.__verify_bootstrapped_and_registered()
+        except Exception as e:
+            self.__do_bootstrap_org_and_crypto_config()
 
-        self.__do_boostrap_org_and_crypto_config()
         # generate new asymmetric client keypair and then store info in persistor
         pub_key = self.__gen_new_asymmetric_keypair(self.persister)
 
