@@ -35,9 +35,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.crypto_config = None
         self.persister = persister
         self.logger = logger
-        self.client = None
 
         # private vars
+        self.__client = None
         self.__api_client = None
         self.__authentication = None
         self.__loaded_private_preferred_key = None
@@ -53,7 +53,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             and self.persister.exists(PERSISTER_ASYM_TYPE)
 
     def __is_bootstrapped(self):
-        return self.org != None and self.crypto_config != None and self.client != None
+        return self.org != None and self.crypto_config != None and self.__client != None
 
     def __do_bootstrap_org_and_crypto_config(self):
         # set up org, api_client, and crypto_config
