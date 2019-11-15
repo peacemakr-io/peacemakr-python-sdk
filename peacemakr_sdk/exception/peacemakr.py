@@ -1,0 +1,3 @@
+
+class PeacemakrError(Exception):
+  pass
