@@ -10,7 +10,7 @@ from peacemakr_sdk.generated.models import *
 
 from peacemakr_sdk.generated.rest import ApiException
 from peacemakr_sdk.crypto_base import PeacemakrCryptoSDK
-
+from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 import peacemakr_core_crypto_python as p
 
 import time
@@ -86,7 +86,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.__load_org(api_client)
         self.__load_crypto_config(api_client)
-
+    
     def __load_org(self, api_client):
         # TODO: add exception
         org_api = OrgApi(api_client=api_client)
@@ -154,25 +154,27 @@ class CryptoImpl(PeacemakrCryptoSDK):
             "RSA_4096": p.AsymmetricCipher.RSA_4096,
             "ECDH_P256": p.AsymmetricCipher.ECDH_P256,
             "ECDH_P384": p.AsymmetricCipher.ECDH_P384,
-            "ECDH_P512": p.AsymmetricCipher.ECDH_P521,
+            "ECDH_P521": p.AsymmetricCipher.ECDH_P521,
         }
 
-        prefix = prefix_dict[key_type]
+        prefix = prefix_dict[key_type.lower()]
         asymm_key = '{}{}'.format(prefix, bit_length)
 
         return asymm_dict[asymm_key]
+
 
     def __verify_bootstrapped_and_registered(self):
         # FIXME: the exception needs to be peacemakr specific
         if not self.__is_registered() or not self.__is_bootstrapped():
             raise Exception("SDK was not registered, please register before using other SDK operations.")
 
-    def __save_new_aymmetric_key_pair(self, src, dst):
-        dst.save(PERSISTER_PRIV_KEY, src.load(PERSISTER_PRIV_KEY));
-        dst.save(PERSISTER_PUB_KEY, src.load(PERSISTER_PUB_KEY));
-        dst.save(PERSISTER_ASYM_TYPE, src.load(PERSISTER_ASYM_TYPE));
-        dst.save(PERSISTER_ASYM_CREATED_DATE_EPOCH, src.load(PERSISTER_ASYM_CREATED_DATE_EPOCH));
-        dst.save(PERSISTER_ASYM_BITLEN, src.load(PERSISTER_ASYM_BITLEN));
+
+    def __save_new_asymmetric_key_pair(self, src, dst):
+        dst.save(PERSISTER_PRIV_KEY, src.load(PERSISTER_PRIV_KEY))
+        dst.save(PERSISTER_PUB_KEY, src.load(PERSISTER_PUB_KEY))
+        dst.save(PERSISTER_ASYM_TYPE, src.load(PERSISTER_ASYM_TYPE))
+        dst.save(PERSISTER_ASYM_CREATED_DATE_EPOCH, src.load(PERSISTER_ASYM_CREATED_DATE_EPOCH))
+        dst.save(PERSISTER_ASYM_BITLEN, src.load(PERSISTER_ASYM_BITLEN))
 
     def __gen_and_register_new_preferred_client_key(self):
         print("Generating a new preferred client key")
@@ -180,39 +182,42 @@ class CryptoImpl(PeacemakrCryptoSDK):
         public_key = self.__gen_new_asymmetric_keypair(temp_in_memory_persister)
 
         print("Registering the new public key")
-        client_api = ClientAPI(self.__get_client())
+        client_api = ClientApi(self.__get_client())
         try:
-            public_key = client_api.addClientPublicKey(this.client.getId(), public_key)
+            public_key = client_api.add_client_public_key(self.__client.id, public_key)
         except ApiException as e:
             print(e)
             pass
 
         print("Successfully registered new public key as client preferred key")
-        self.__save_new_aymmetric_key_pair(temp_in_memory_persister, self.persister)
-        self.persister.save(PERSISTER_PREFERRED_KEYID, public_key.getId())
+        self.__save_new_asymmetric_key_pair(temp_in_memory_persister, self.persister)
+        self.persister.save(PERSISTER_PREFERRED_KEYID, public_key.id)
 
         print("Successfully saved new public key as client preferred key")
 
     def __update_local_crypto_config(self, new_config):
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
-        if not new_config.getClientKeyType().equals(cur_asymmetric_key_type):
+        if not new_config.client_key_type == cur_asymmetric_key_type:
             #FIXME: add logger
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
+            return
 
         cur_asymmetric_key_creation_time = self.persister.load(PERSISTER_ASYM_CREATED_DATE_EPOCH)
-        asymmetric_key_creation_time = long(cur_asymmetric_key_creation_time)
-        if (new_config.getClientKeyTTL() + asymmetric_key_creation_time) > int(round(time.time())):
+        asymmetric_key_creation_time = cur_asymmetric_key_creation_time
+        if (new_config.client_key_ttl + asymmetric_key_creation_time) > int(round(time.time())):
             #FFIXME: add logger
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
+            return
 
-        cur_asymmetric_key_bit_lens = self.persister.load(PERSISTER_ASYM_BITLEN);
+        cur_asymmetric_key_bit_lens = self.persister.load(PERSISTER_ASYM_BITLEN)
         asymmertric_key_bit_len = int(cur_asymmetric_key_bit_lens)
-        if asymmertric_key_bit_len != new_config.getClientKeyBitlength():
+        if asymmertric_key_bit_len != new_config.client_key_bitlength:
             #FIXME: add logger
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
+            return
 
         self.crypto_config = new_config
 
@@ -243,21 +248,23 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         # self.persister.debug() # prints all info in the persister
 
-        # save info in persister
 
 
     def sync(self):
         self.__verify_bootstrapped_and_registered()
         crypto_config_api = CryptoConfigApi(self.__get_client())
 
-        try:
-            new_config = crypto_config_api.get_crypto_config(self.crypto_config.id)
-            if not new_config == self.crypto_config:
-                self.__update_local_crypto_config(new_config)
-        except ApiException as e:
+        # # # try:
+        new_config = crypto_config_api.get_crypto_config(self.crypto_config.id)
+        if new_config != self.crypto_config:
+            print(new_config)
+            print("-------------------")
+            print(self.crypto_config)
+            self.__update_local_crypto_config(new_config)
+        # except ApiException as e:
             #FIXME: create server exception
-            raise ServerException(e)
-        pass
+            # raise ServerException(e)
+        
 
         # FIXME: uncomment when implemented
         # self.__download_and_save_all_keys()

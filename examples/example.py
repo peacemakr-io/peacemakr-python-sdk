@@ -2,6 +2,8 @@ import peacemakr_sdk
 from peacemakr_sdk.factory import Factory
 from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 
+import time
+
 def main():
     api_key = "/ZW/VzgAgLjGfORzyEuWPxkp8O37hgzkU+uXGbc8Dtw="
     persister = InMemoryPersister()
@@ -12,8 +14,8 @@ def main():
                                    )
     
     sdk.register()
-    
-    # sdk.sync()
+    time.sleep(120)
+    sdk.sync()
     # sdk.encrypt(b'some text')
     # sdk.encrypt_in_domain(b'some text', "some domain")
     # sdk.decrypt(b'cipher text')
