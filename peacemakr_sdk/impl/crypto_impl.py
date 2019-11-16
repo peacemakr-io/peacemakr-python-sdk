@@ -14,7 +14,8 @@ from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 import peacemakr_core_crypto_python as p
 
 import time
-
+import json
+import base64
 
 PYTHON_SDK_VERSION = "0.0.1"
 PERSISTER_PRIV_KEY = "Priv"
@@ -221,6 +222,106 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.crypto_config = new_config
 
+    def __download_and_save_all_keys(self, required_keys=[]):
+        ''' calls keyServiceApi to get all the encrypted keys just generated from the key deriver
+        '''
+
+        key_api = KeyServiceApi(api_client=self.__get_client())
+        all_keys = key_api.get_all_encrypted_keys(self.__client.preferred_public_key_id, symmetric_key_ids=required_keys)
+
+        if len(all_keys) == 0:
+            # add logger
+            print("No encrypted symmetric keys to be decrypted")
+
+        self.__decrypt_and_save(all_keys)
+        #self.persister.debug()
+
+
+    def __decrypt_and_save(self, all_keys):
+        ''' decryptes the encrypted symmetric keys and save them to persister
+        '''
+
+        if (self.__loaded_private_preferred_key == None):
+            self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
+            self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
+
+        context = p.CryptoContext()
+        for key in all_keys:
+            if key == None:
+                continue
+
+            raw_cipher_text_str = key.packaged_ciphertext
+            if raw_cipher_text_str == None:
+                print("Error: raw cipher text is None")
+
+
+            # deserialized[0] is a pycapule object that decrypt takes in, deseralized[1] is the config
+            deserialized = context.deserialize(raw_cipher_text_str)
+
+            extracted_aad = context.extract_unverified_aad(raw_cipher_text_str)
+            # check if extracted aad is null
+            if extracted_aad == "":
+                # raise exception
+                print("Extracted aad is empty")
+
+            aad = json.loads(extracted_aad.aad)
+
+            verification_key = self.__get_or_download_public_key(aad["senderKeyID"])
+
+            if self.__is_ec(self.__loaded_private_preferred_cipher):
+                # print("In EC")
+                # verfication is the peer key and client key is "my_key"
+                ehcd_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
+                result = context.decrypt(ehcd_key, deserialized[0])
+                verifed = context.verify(ehcd_key, result[0], deserialized[0])
+                print("IS EC VERIFIED, needVerify:", verifed, result[1]) # TODO: hmmm maybe some op is wrong?
+            elif self.__is_rsa(self.__loaded_private_preferred_cipher):
+                # print("In RSA")
+                result = context.decrypt(self.__loaded_private_preferred_key, deserialized[0])
+                verifed = context.verify(self.__loaded_private_preferred_key, result[0], deserialized[0])
+                print("IS RSA VERIFIED, needVerify:", verifed, result[1]) # TODO: hmmm maybe some op is wrong?
+            else:
+                # raise exception
+                print("KEY SELECT NOT IDENTIFIED, SOMETHING IS WRONG")
+
+            # data is the plaintext, result = [plainText, NeedVerify:bool]; plainText = {data, aad}
+            keys_in_str = result[0].data
+
+            key_len = key.key_length
+            keys_in_bytes = base64.decodebytes(keys_in_str.encode())
+            for i in range(len(key.key_ids)):
+                # loop thru each key id and save their respective keys
+                key_in_bytes = keys_in_bytes[i*key_len:(i+1)*key_len]
+                self.persister.save(key.key_ids[i], key_in_bytes)
+
+    def __is_ec(self, cipher):
+        if cipher in {p.AsymmetricCipher.ECDH_P256, p.AsymmetricCipher.ECDH_P384, p.AsymmetricCipher.ECDH_P521}:
+            return True
+        return False
+
+    def __is_rsa(self, cipher):
+        if cipher in {p.AsymmetricCipher.RSA_2048, p.AsymmetricCipher.RSA_4096}:
+            return True
+        return False
+
+    def __get_or_download_public_key(self, key_id):
+        if (self.persister.exists(key_id)):
+            return self.persister.load(key_id)
+
+        key_service_api = KeyServiceApi(self.__get_client())
+
+        # TODO:add try, except
+        # try
+        pub_key = key_service_api.get_public_key(key_id)
+        # except
+
+        self.persister.save(key_id, pub_key.key)
+
+        # constructor for AsymmetricKey:(SYM_CIPHER, pub_key:str, pri_key=True/False)
+        pub_pem = p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
+
+        return pub_pem
+
 
     def register(self):
         # check is register and is boostrap, if not initialize
@@ -249,25 +350,19 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # self.persister.debug() # prints all info in the persister
 
 
-
     def sync(self):
         self.__verify_bootstrapped_and_registered()
         crypto_config_api = CryptoConfigApi(self.__get_client())
 
-        # # # try:
-        new_config = crypto_config_api.get_crypto_config(self.crypto_config.id)
-        if new_config != self.crypto_config:
-            print(new_config)
-            print("-------------------")
-            print(self.crypto_config)
-            self.__update_local_crypto_config(new_config)
-        # except ApiException as e:
+        try:
+            new_config = crypto_config_api.get_crypto_config(self.crypto_config.id)
+            if new_config != self.crypto_config:
+                self.__update_local_crypto_config(new_config)
+        except ApiException as e:
             #FIXME: create server exception
-            # raise ServerException(e)
-        
+            raise ServerException(e)
 
-        # FIXME: uncomment when implemented
-        # self.__download_and_save_all_keys()
+        self.__download_and_save_all_keys()
 
     def encrypt(self, plain_text: bytes) -> bytes:
         print("In encrypt")
