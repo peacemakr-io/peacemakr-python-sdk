@@ -273,18 +273,22 @@ class CryptoImpl(PeacemakrCryptoSDK):
                 # verfication is the peer key and client key is "my_key"
                 ehcd_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
                 result = context.decrypt(ehcd_key, deserialized[0])
-                verifed = context.verify(ehcd_key, result[0], deserialized[0])
-                print("IS EC VERIFIED, needVerify:", verifed, result[1]) # TODO: hmmm maybe some op is wrong?
             elif self.__is_rsa(self.__loaded_private_preferred_cipher):
                 # print("In RSA")
                 result = context.decrypt(self.__loaded_private_preferred_key, deserialized[0])
-                verifed = context.verify(self.__loaded_private_preferred_key, result[0], deserialized[0])
-                print("IS RSA VERIFIED, needVerify:", verifed, result[1]) # TODO: hmmm maybe some op is wrong?
             else:
                 # raise exception
                 print("KEY SELECT NOT IDENTIFIED, SOMETHING IS WRONG")
 
             # data is the plaintext, result = [plainText, NeedVerify:bool]; plainText = {data, aad}
+            need_verfication = result[1]
+            # check verfication
+            if need_verfication:
+                verfied = context.verify(verification_key, result[0], deserialized[0])
+                if verfied == False:
+                    # raise verficationException?
+                    print("Error Verfication Failed")
+
             keys_in_str = result[0].data
 
             key_len = key.key_length
