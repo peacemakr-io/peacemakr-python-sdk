@@ -1,3 +1,6 @@
+import base64
+import peacemakr_core_crypto_python as p
+
 from random import randint
 from time import time
 
@@ -9,11 +12,22 @@ from peacemakr_sdk.generated import SymmetricKeyUseDomain
 def random_index(l: list):
     return l[randint(0, len(l) - 1)]
 
+DEFAULT_MESSAGE_DIGEST = p.DigestAlgorithm.SHA_256
 
 class CryptoImpl(PeacemakrCryptoSDK):
 
     def __init__(self, api_key=""):
         self.api_key = api_key
+
+        self.__Chacha20Poly1305 = "Peacemakr.Symmetric.CHACHA20_POLY1305"
+        self.__Aes128gcm = "Peacemakr.Symmetric.AES_128_GCM"
+        self.__Aes192gcm = "Peacemakr.Symmetric.AES_192_GCM"
+        self.__Aes256gcm = "Peacemakr.Symmetric.AES_256_GCM"
+
+        self.__Sha224 = "Peacemakr.Digest.SHA_224"
+        self.__Sha256 = "Peacemakr.Digest.SHA_256"
+        self.__Sha384 = "Peacemakr.Digest.SHA_384"
+        self.__Sha512 = "Peacemakr.Digest.SHA_512"
 
     def register(self):
         print("In register")
@@ -64,11 +78,54 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return random_index(use_domain.encryption_key_ids)
 
     def __get_key(self, key_id: str) -> bytes:
+        # TODO : Handle already existing keys using persister.
+
+        # Is this list really required ?
+        required_keys = [key_id]
+
+        # Check function exists
+        assert self.__download_and_save_all_keys, "Missing implementation for __download_and_save_all_keys"
+        self.__download_and_save_all_keys(required_keys)
+
+        # TODO : Handle persister missing keys exception.
+
+        key = self.persister.load(key_id)
+        return base64.b64decode(key)
+
+    def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
+        select_cipher = {
+            self.__Chacha20Poly1305: p.SymmetricCipher.CHACHA20_POLY1305,
+            self.__Aes128gcm: p.SymmetricCipher.AES_128_GCM,
+            self.__Aes192gcm: p.SymmetricCipher.AES_192_GCM,
+            self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM
+            }
+        return select_cipher[symmetric_key_encryption_alg]
+
+    def __get_signing_key(self, use_domain: SymmetricKeyUseDomain) -> p.Key:
+        if use_domain.digest_algorithm is None:
+            return None
+
+        # TODO : Handle persister.
+
+        # TODO : Check if this piece of java code needs persister.
+
+    def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
+        if digest_algorithm == self.__Sha224:
+            return p.DigestAlgorithm.SHA_224
+        elif digest_algorithm == self.__Sha256:
+            return p.DigestAlgorithm.SHA_256
+        elif digest_algorithm == self.__Sha384:
+            return p.DigestAlgorithm.SHA_384
+        elif digest_algorithm == self.__Sha512:
+            return p.DigestAlgorithm.SHA_512
+        else:
+            # TODO : Handle logger.
+            return DEFAULT_MESSAGE_DIGEST
 
     def encrypt(self, plain_text: bytes) -> bytes:
         print("In encrypt")
-        # TODO: Check if call is correct.
-        assert self.__verify_bootstrapped_and_registered
+        # TODO: Check if function exists.
+        assert self.__verify_bootstrapped_and_registered, "Missing implementation for __verify_bootstrapped_and_registered"
         self.__verify_bootstrapped_and_registered()
         used_domain_name = self.__select_use_domain_name()
         return self.encrypt_in_domain(plain_text, used_domain_name)
@@ -82,6 +139,23 @@ class CryptoImpl(PeacemakrCryptoSDK):
         key = None
         try:
             key = self.__get_key(encryption_key_id_for_encryption)
+        except Exception:
+            # TODO : Handle logger error
+            # TODO : Handle custom peacemakr errors
+            print("Something went wrong with encrypt domain")
+
+        symmetric_cipher = self.__get_symmetric_cipher(use_domain_for_encryption.symmetric_key_encryption_alg)
+        signing_key = self.__get_signing_key()
+        digest = self.__get_digest_alg(use_domain_for_encryption.digest_algorithm)
+
+        # TODO : import it from peacemakr_sdk.impl.models
+        aad = CiphertextAAD()
+        aad.crypto_key_id = encryption_key_id_for_encryption
+        # TODO : Handle sender_key_id init via persister.
+
+        # TODO :
+
+
 
     def decrypt(self, cipher_text: bytes) -> bytes:
         print("In decrypt")
