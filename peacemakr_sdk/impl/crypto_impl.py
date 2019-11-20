@@ -22,7 +22,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__Chacha20Poly1305 = "Peacemakr.Symmetric.CHACHA20_POLY1305"
         self.__Aes128gcm = "Peacemakr.Symmetric.AES_128_GCM"
         self.__Aes192gcm = "Peacemakr.Symmetric.AES_192_GCM"
-        self.__Aes256gcm = "Peacemakr.Symmetric.AES_256_GCM"
+        self.__Aes256gcm = "Peacemakr.Symmetric.AES-256-GCM"
 
         self.__Sha224 = "Peacemakr.Digest.SHA_224"
         self.__Sha256 = "Peacemakr.Digest.SHA_256"
@@ -40,7 +40,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     # TODO : Fix type hinting for domain.
     def __domain_is_valid_for_encryption(self, domain: SymmetricKeyUseDomain) -> bool:
         # TODO : Test the time with the java time to make sure everything is ok.
-        now_in_seconds = int(round(time() * 1000))
+        now_in_seconds = int(round(time.time()))
         return domain.creation_time + domain.symmetric_key_decryption_use_ttl > now_in_seconds \
                and domain.creation_time + domain.symmetric_key_inception_ttl <= now_in_seconds
 
@@ -56,7 +56,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __get_valid_use_domain_for_encryption(self, use_domain_name: str) -> SymmetricKeyUseDomain:
         use_domains = self.crypto_config.symmetric_key_use_domains
         valid_domain_with_this_name = []
-
         # TODO : Handle logger call.
 
         for domain in use_domains:
@@ -90,24 +89,32 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # TODO : Handle persister missing keys exception.
 
         key = self.persister.load(key_id)
-        return base64.b64decode(key)
+        return key
 
     def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
+        # FIXME: This needs some cleaning up, last elt of dict should not exist but there is a problem
         select_cipher = {
             self.__Chacha20Poly1305: p.SymmetricCipher.CHACHA20_POLY1305,
             self.__Aes128gcm: p.SymmetricCipher.AES_128_GCM,
             self.__Aes192gcm: p.SymmetricCipher.AES_192_GCM,
-            self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM
-            }
+            self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM,
+            'AES-256-GCM': p.SymmetricCipher.AES_256_GCM
+        }
         return select_cipher[symmetric_key_encryption_alg]
+
 
     def __get_signing_key(self, use_domain: SymmetricKeyUseDomain) -> p.Key:
         if use_domain.digest_algorithm is None:
             return None
 
-        # TODO : Handle persister.
+        if self.__loaded_private_preferred_key != None:
+            return self.__loaded_private_preferred_key
 
-        # TODO : Check if this piece of java code needs persister.
+        private_pem = self.persister.load(PERSISTER_PRIV_KEY)
+        self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, private_pem)
+        self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), int(self.persister.load(PERSISTER_ASYM_BITLEN)))
+
+        return self.__loaded_private_preferred_key
 
     def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
         if digest_algorithm == self.__Sha224:
@@ -137,24 +144,36 @@ class CryptoImpl(PeacemakrCryptoSDK):
         encryption_key_id_for_encryption = self.__get_encryption_key_id(use_domain_for_encryption)
 
         key = None
+        symmetric_cipher = self.__get_symmetric_cipher(use_domain_for_encryption.symmetric_key_encryption_alg)
         try:
-            key = self.__get_key(encryption_key_id_for_encryption)
+            key = p.Key(symmetric_cipher, self.__get_key(encryption_key_id_for_encryption))
         except Exception:
             # TODO : Handle logger error
             # TODO : Handle custom peacemakr errors
             print("Something went wrong with encrypt domain")
 
-        symmetric_cipher = self.__get_symmetric_cipher(use_domain_for_encryption.symmetric_key_encryption_alg)
         signing_key = self.__get_signing_key()
         digest = self.__get_digest_alg(use_domain_for_encryption.digest_algorithm)
 
-        # TODO : import it from peacemakr_sdk.impl.models
         aad = CiphertextAAD()
         aad.crypto_key_id = encryption_key_id_for_encryption
-        # TODO : Handle sender_key_id init via persister.
+        aad.sender_key_id = self.persister.load(PERSISTER_PREFERRED_KEYID);
 
-        # TODO :
+        pm_plain_text = p.Plaintext(plain_text, bytes(json.dumps(aad.__dict__), encoding='utf8'))
 
+        random_device = p.RandomDevice()
+
+        cipher_text = p.CryptoContext().encrypt(key, pm_plain_text, random_device)
+
+        my_priv_key_str = self.persister.load(PERSISTER_PRIV_KEY)
+        my_key = p.Key(symmetric_cipher, my_priv_key_str)
+
+        try :
+            p.CryptoContext().sign(my_key, pm_plain_text, digest, cipher_text)
+        except Exception as e:
+            raise(e)
+
+        return p.CryptoContext().serialize(digest, cipher_text)
 
 
     def decrypt(self, cipher_text: bytes) -> bytes:
