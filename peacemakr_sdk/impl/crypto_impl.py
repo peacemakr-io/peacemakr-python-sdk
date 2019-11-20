@@ -196,23 +196,18 @@ class CryptoImpl(PeacemakrCryptoSDK):
         dst.save(PERSISTER_ASYM_BITLEN, src.load(PERSISTER_ASYM_BITLEN))
 
     def __gen_and_register_new_preferred_client_key(self):
-        print("Generating a new preferred client key")
         temp_in_memory_persister: InMemoryPersister = InMemoryPersister()
         public_key = self.__gen_new_asymmetric_keypair(temp_in_memory_persister)
 
-        print("Registering the new public key")
         client_api = ClientApi(self.__get_client())
         try:
             public_key = client_api.add_client_public_key(self.__client.id, public_key)
         except ApiException as e:
-            print(e)
             pass
 
-        print("Successfully registered new public key as client preferred key")
         self.__save_new_asymmetric_key_pair(temp_in_memory_persister, self.persister)
         self.persister.save(PERSISTER_PREFERRED_KEYID, public_key.id)
 
-        print("Successfully saved new public key as client preferred key")
 
     def __update_local_crypto_config(self, new_config):
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
@@ -248,8 +243,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         all_keys = key_api.get_all_encrypted_keys(self.__client.preferred_public_key_id, symmetric_key_ids=required_keys)
 
         if len(all_keys) == 0:
+            print('')
             # add logger
-            print("No encrypted symmetric keys to be decrypted")
 
         self.__decrypt_and_save(all_keys)
         #self.persister.debug()
@@ -270,8 +265,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
             raw_cipher_text_str = key.packaged_ciphertext
             if raw_cipher_text_str == None:
-                print("Error: raw cipher text is None")
-
+                print('')
 
             # deserialized[0] is a pycapule object that decrypt takes in, deseralized[1] is the config
             deserialized = context.deserialize(raw_cipher_text_str)
@@ -279,24 +273,25 @@ class CryptoImpl(PeacemakrCryptoSDK):
             extracted_aad = context.extract_unverified_aad(raw_cipher_text_str)
             # check if extracted aad is null
             if extracted_aad == "":
+                print('')
                 # raise exception
-                print("Extracted aad is empty")
 
             aad = json.loads(extracted_aad.aad)
 
             verification_key = self.__get_or_download_public_key(aad["senderKeyID"])
 
             if self.__is_ec(self.__loaded_private_preferred_cipher):
-                # print("In EC")
                 # verfication is the peer key and client key is "my_key"
+                if isinstance(verification_key, str):
+                    verification_key = p.Key(DEFAULT_SYMM_CIPHER, verification_key)
+
                 ehcd_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
                 result = context.decrypt(ehcd_key, deserialized[0])
             elif self.__is_rsa(self.__loaded_private_preferred_cipher):
-                # print("In RSA")
                 result = context.decrypt(self.__loaded_private_preferred_key, deserialized[0])
             else:
+                print('')
                 # raise exception
-                print("KEY SELECT NOT IDENTIFIED, SOMETHING IS WRONG")
 
             # data is the plaintext, result = [plainText, NeedVerify:bool]; plainText = {data, aad}
             need_verfication = result[1]
@@ -304,8 +299,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
             if need_verfication:
                 verfied = context.verify(verification_key, result[0], deserialized[0])
                 if verfied == False:
+                    print('')
                     # raise verficationException?
-                    print("Error Verfication Failed")
 
             keys_in_str = result[0].data
 
@@ -328,7 +323,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __get_or_download_public_key(self, key_id):
         if (self.persister.exists(key_id)):
-            return self.persister.load(key_id)
+            return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
 
         key_service_api = KeyServiceApi(self.__get_client())
 
@@ -341,7 +336,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         # constructor for AsymmetricKey:(SYM_CIPHER, pub_key:str, pri_key=True/False)
         pub_pem = p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
-
         return pub_pem
 
 
@@ -437,8 +431,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # TODO : Handle persister missing keys exception.
 
         key = self.persister.load(key_id)
-        print(base64.b64decode(key))
-        return base64.b64decode(key)
+        return key
 
     def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
         select_cipher = {
@@ -448,20 +441,22 @@ class CryptoImpl(PeacemakrCryptoSDK):
             self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM,
             'AES-256-GCM': p.SymmetricCipher.AES_256_GCM
         }
-        print(symmetric_key_encryption_alg)
-        print(select_cipher)
         return select_cipher[symmetric_key_encryption_alg]
 
     def __get_signing_key(self, use_domain: SymmetricKeyUseDomain) -> p.Key:
         if use_domain.digest_algorithm is None:
             return None
 
-        # TODO : Handle persister.
+        if self.__loaded_private_preferred_key != None:
+            return self.__loaded_private_preferred_key
 
-        # TODO : Check if this piece of java code needs persister.
+        private_pem = self.persister.load(PERSISTER_PRIV_KEY)
+        self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, private_pem)
+        self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), int(self.persister.load(PERSISTER_ASYM_BITLEN)))
+
+        return self.__loaded_private_preferred_key
 
     def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
-        print(digest_algorithm)
         if digest_algorithm == self.__Sha224:
             return p.DigestAlgorithm.SHA_224
         elif digest_algorithm == self.__Sha256 or digest_algorithm == 'SHA_256':
@@ -475,7 +470,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return DEFAULT_MESSAGE_DIGEST
 
     def encrypt(self, plain_text: bytes) -> bytes:
-        print("In encrypt")
         # TODO: Check if function exists.
         assert self.__verify_bootstrapped_and_registered, "Missing implementation for __verify_bootstrapped_and_registered"
         self.__verify_bootstrapped_and_registered()
@@ -483,55 +477,80 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.encrypt_in_domain(plain_text, used_domain_name)
 
     def encrypt_in_domain(self, plain_text: bytes, use_domain_name: str) -> bytes:
-        print("In encrypt in domain")
         self.__verify_bootstrapped_and_registered()
         use_domain_for_encryption = self.__get_valid_use_domain_for_encryption(use_domain_name)
+        # Go does more stuff -> maybe explore
         encryption_key_id_for_encryption = self.__get_encryption_key_id(use_domain_for_encryption)
+
+        symmetric_cipher = self.__get_symmetric_cipher(use_domain_for_encryption.symmetric_key_encryption_alg)
 
         key = None
         try:
-            key = self.__get_key(encryption_key_id_for_encryption)
-        except Exception:
+            key = p.Key(symmetric_cipher, self.__get_key(encryption_key_id_for_encryption))
+            print(type(key))
+        except Exception as e:
             # TODO : Handle logger error
             # TODO : Handle custom peacemakr errors
-            print("Something went wrong with encrypt domain")
+            raise(e)
 
-        symmetric_cipher = self.__get_symmetric_cipher(use_domain_for_encryption.symmetric_key_encryption_alg)
         signing_key = self.__get_signing_key(use_domain_for_encryption)
+        print(type(signing_key))
         digest = self.__get_digest_alg(use_domain_for_encryption.digest_algorithm)
 
         # TODO : import it from peacemakr_sdk.impl.models
         aad = CiphertextAAD()
         aad.crypto_key_id = encryption_key_id_for_encryption
         # TODO : Handle sender_key_id init via persister.
+        # FIXME: do we need to get keyid from API (getPreferredPubKeyId)?
         aad.sender_key_id = self.persister.load(PERSISTER_PREFERRED_KEYID);
 
         # TODO :
-        pm_plain_text = {
-            'Data': plain_text,
-            'Aad': json.dumps(aad)
-        }
+        pm_plain_text = p.Plaintext(plain_text, bytes(json.dumps(aad.__dict__), encoding='utf8'))
 
         random_device = p.RandomDevice()
-        cipher_text = p.CryptoContext.encrypt()
 
-    def __parse_cipher_text_AAD(self, aad: str):
-        return CiphertextAAD(**json.loads(aad))
+        cipher_text = p.CryptoContext().encrypt(key, pm_plain_text, random_device)
+
+        my_priv_key_str = self.persister.load(PERSISTER_PRIV_KEY)
+        my_key = p.Key(symmetric_cipher, my_priv_key_str)
+
+        try :
+            p.CryptoContext().sign(my_key, pm_plain_text, digest, cipher_text)
+        except Exception as e:
+            raise(e)
+
+        return p.CryptoContext().serialize(digest, cipher_text)
+
+
+    def __parse_cipher_text_AAD(self, aad):
+        # FIXME: please dont do this
+        j = json.loads(aad)
+        j = {
+            'cryptoKeyID': j['crypto_key_id'],
+            'senderKeyID': j['sender_key_id']
+        }
+        return CiphertextAAD(**j)
 
     def decrypt(self, cipher_text: bytes) -> bytes:
         # FIXME: not sure what's the use case for serialize deserialize in core crypto
         # FIXME: uncomment code when the functions are implemented (in other PRs)
 
-        # self.__verify_bootstrapped_and_registered()
-        aad = self.__parse_cipher_text_AAD(p.CryptoContext().extract_unverified_aad(cipher_text).aad)
+        self.__verify_bootstrapped_and_registered()
+        aadude = p.CryptoContext().extract_unverified_aad(cipher_text).aad
+        aad = self.__parse_cipher_text_AAD(aadude)
         key = None
         try:
-            # key = self.__get_key(aad.cryptoKeyID)
+            print(aad.crypto_key_id)
+            key = self.__get_key(aad.crypto_key_id)
+            key = p.Key(DEFAULT_SYMM_CIPHER, key)
             pass
         except Exception as e:
             # FIXME: Above should not be Exception but something explicit
             # raise PersistenceLayerCorruptionDetected(e)
+            raise(e)
             pass
 
-        # verificationKey = self.__get_or_download_public_key()
-        # return p.CryptoContext().decrypt(key, verificationKey, cipher_text)
+        verificationKey = self.__get_or_download_public_key(aad.sender_key_id)
+        # print(6666, type(verificationKey))
+        des = p.CryptoContext().deserialize(cipher_text)[0]
+        return p.CryptoContext().decrypt(key, des)[0].data
