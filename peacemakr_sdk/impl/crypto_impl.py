@@ -87,7 +87,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.__load_org(api_client)
         self.__load_crypto_config(api_client)
-    
+
     def __load_org(self, api_client):
         # TODO: add exception
         org_api = OrgApi(api_client=api_client)
@@ -310,7 +310,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __get_or_download_public_key(self, key_id):
         if (self.persister.exists(key_id)):
-            return self.persister.load(key_id)
+            return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
 
         key_service_api = KeyServiceApi(self.__get_client())
 
