@@ -381,3 +381,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def decrypt(self, cipher_text: bytes) -> bytes:
         print("In decrypt")
         pass
+
+    def check_registered(self):
+        return self.__is_registered() and self.__is_bootstrapped()
+
+    def check_synced(self):
+        return self.check_registered() and self.__loaded_private_preferred_key != None
