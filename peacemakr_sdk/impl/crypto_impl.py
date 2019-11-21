@@ -283,7 +283,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             if self.__is_ec(self.__loaded_private_preferred_cipher):
                 # verfication is the peer key and client key is "my_key"
                 if isinstance(verification_key, str):
-                    verification_key = p.Key(DEFAULT_SYMM_CIPHER, verification_key)
+                    verification_key = p.Key(DEFAULT_SYMM_CIPHER, verification_key, False)
 
                 ehcd_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
                 result = context.decrypt(ehcd_key, deserialized[0])
@@ -321,9 +321,14 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return True
         return False
 
-    def __get_or_download_public_key(self, key_id):
+    def __get_or_download_public_key(self, key_id, cfg=None):
         if (self.persister.exists(key_id)):
-            return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
+            print(2222)
+            if cfg:
+                print(1111)
+                return p.Key(p.SymmetricCipher(cfg.symm_cipher), self.persister.load(key_id), False)
+            else:
+                return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
 
         key_service_api = KeyServiceApi(self.__get_client())
 
@@ -335,8 +340,12 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.persister.save(key_id, pub_key.key)
 
         # constructor for AsymmetricKey:(SYM_CIPHER, pub_key:str, pri_key=True/False)
-        pub_pem = p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
-        return pub_pem
+        if not cfg:
+            pub_pem = p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
+            return pub_pem
+        else:
+            print(cfg.symm_cipher)
+            return p.Key(p.SymmetricCipher(cfg.symm_cipher), pub_key.key, False)
 
 
     def register(self):
@@ -420,6 +429,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __get_key(self, key_id: str) -> bytes:
         # TODO : Handle already existing keys using persister.
+        if self.persister.exists(key_id):
+            return self.persister.load(key_id)
 
         # Is this list really required ?
         required_keys = [key_id]
@@ -430,16 +441,16 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         # TODO : Handle persister missing keys exception.
 
-        key = self.persister.load(key_id)
-        return key
+        return self.persister.load(key_id)
+
 
     def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
         select_cipher = {
-            self.__Chacha20Poly1305: p.SymmetricCipher.CHACHA20_POLY1305,
+            'CHACHA20_POLY1305': p.SymmetricCipher.CHACHA20_POLY1305,
             self.__Aes128gcm: p.SymmetricCipher.AES_128_GCM,
             self.__Aes192gcm: p.SymmetricCipher.AES_192_GCM,
             self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM,
-            'AES-256-GCM': p.SymmetricCipher.AES_256_GCM
+            'AES-256-GCM': p.SymmetricCipher.AES_256_GCM,
         }
         return select_cipher[symmetric_key_encryption_alg]
 
@@ -494,7 +505,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise(e)
 
         signing_key = self.__get_signing_key(use_domain_for_encryption)
-        print(type(signing_key))
+        print(signing_key)
         digest = self.__get_digest_alg(use_domain_for_encryption.digest_algorithm)
 
         # TODO : import it from peacemakr_sdk.impl.models
@@ -503,7 +514,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # TODO : Handle sender_key_id init via persister.
         # FIXME: do we need to get keyid from API (getPreferredPubKeyId)?
         aad.sender_key_id = self.persister.load(PERSISTER_PREFERRED_KEYID);
-
+        print(aad.sender_key_id)
         # TODO :
         pm_plain_text = p.Plaintext(plain_text, bytes(json.dumps(aad.__dict__), encoding='utf8'))
 
@@ -531,26 +542,50 @@ class CryptoImpl(PeacemakrCryptoSDK):
         }
         return CiphertextAAD(**j)
 
+    def verify_message(self, aad, cfg, ciphertext, plaintext):
+        sender_key = self.__get_or_download_public_key(aad.sender_key_id, cfg)
+        # sender_key = p.Key(cfg.symm_cipher, sender_key_str, False)
+        ret = p.CryptoContext().verify(sender_key, plaintext, ciphertext)
+        return ret
+
+    def __find_viable_decryption_use_domains(self):
+        use_domains = self.crypto_config.symmetric_key_use_domains
+        viable_domains = [domain for domain in use_domains if domain.symmetric_key_decryption_allowed]
+        return viable_domains
+
+    def __is_key_id_decryption_viable(self, key_id):
+        viable_decryption_domains = self.__find_viable_decryption_use_domains()
+        for domain in viable_decryption_domains:
+            if key_id in domain.encryption_key_ids:
+                return True
+        return False
+
     def decrypt(self, cipher_text: bytes) -> bytes:
         # FIXME: not sure what's the use case for serialize deserialize in core crypto
         # FIXME: uncomment code when the functions are implemented (in other PRs)
 
         self.__verify_bootstrapped_and_registered()
-        aadude = p.CryptoContext().extract_unverified_aad(cipher_text).aad
-        aad = self.__parse_cipher_text_AAD(aadude)
+
+        cipher_text_blob, cfg = p.CryptoContext().deserialize(cipher_text)
+        print()
+        aad = p.CryptoContext().extract_unverified_aad(cipher_text).aad
+        aad = self.__parse_cipher_text_AAD(aad)
+        print(aad.sender_key_id)
+        if not self.__is_key_id_decryption_viable(aad.crypto_key_id):
+            print('Key is no longer viable for decryption')
+            raise(Exception('Ciphertext is no longer viable for decryption'))
+
         key = None
         try:
-            print(aad.crypto_key_id)
             key = self.__get_key(aad.crypto_key_id)
-            key = p.Key(DEFAULT_SYMM_CIPHER, key)
-            pass
         except Exception as e:
-            # FIXME: Above should not be Exception but something explicit
-            # raise PersistenceLayerCorruptionDetected(e)
             raise(e)
-            pass
 
-        verificationKey = self.__get_or_download_public_key(aad.sender_key_id)
-        # print(6666, type(verificationKey))
-        des = p.CryptoContext().deserialize(cipher_text)[0]
-        return p.CryptoContext().decrypt(key, des)[0].data
+        pmKey = p.Key(p.SymmetricCipher(cfg.symm_cipher), key)
+        plain_text, need_verification = p.CryptoContext().decrypt(pmKey, cipher_text_blob)
+        if need_verification:
+            if not self.verify_message(aad, cfg, cipher_text_blob, plain_text):
+                print('Verification failed')
+                raise(Exception('Problem verifying'))
+
+        return plain_text.data
