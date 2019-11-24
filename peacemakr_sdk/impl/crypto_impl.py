@@ -28,6 +28,7 @@ from peacemakr_sdk.exception.unrecoverable_clock_skew_detected import Unrecovera
 
 from peacemakr_sdk.crypto_base import PeacemakrCryptoSDK
 from peacemakr_sdk.impl.persister_impl import InMemoryPersister
+from peacemakr_sdk.persister_base import Persister
 import peacemakr_core_crypto_python as p
 
 from random import randint
@@ -135,7 +136,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.__api_client
 
     # Key Related functions
-    def __gen_new_asymmetric_keypair(self, persister: InMemoryPersister) -> PublicKey:
+    def __gen_new_asymmetric_keypair(self, persister: Persister) -> PublicKey:
         rand = p.RandomDevice()
 
         symm_cipher = DEFAULT_SYMM_CIPHER
@@ -247,7 +248,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             if not len(all_keys):
                 raise ApiException('Empty key list')
             self.__decrypt_and_save(all_keys)
-            #self.persister.debug()
         except ApiException as e:
             raise ServerError(e)
 
@@ -256,6 +256,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __decrypt_and_save(self, all_keys: list):
         ''' decryptes the encrypted symmetric keys and save them to persister
         '''
+        # move to bootstrap and refactor into getter function
         if (self.__loaded_private_preferred_key == None):
             self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
             self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
@@ -266,9 +267,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
             raw_cipher_text_str = key.packaged_ciphertext
             if raw_cipher_text_str == None:
+                # raise exception
                 print('Failed to get raw ciphertext str from EncryptedSymmetricKey')
 
-            # deserialized[0] is a pycapule object that decrypt takes in, deseralized[1] is the config
+            # deserialized[0] is a pycapsule object that decrypt takes in, 
+            # deseralized[1] is the config (sym cipher, asym cipher, digest algo, and mode)
             deserialized = self.__crypto_context.deserialize(raw_cipher_text_str)
 
             extracted_aad = self.__crypto_context.extract_unverified_aad(raw_cipher_text_str)
@@ -285,8 +288,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
                 if isinstance(verification_key, str):
                     verification_key = p.Key(DEFAULT_SYMM_CIPHER, verification_key, False)
 
-                ehcd_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
-                result = self.__crypto_context.decrypt(ehcd_key, deserialized[0])
+                shared_symm_key = p.Key(DEFAULT_SYMM_CIPHER, self.__loaded_private_preferred_key, verification_key)
+                result = self.__crypto_context.decrypt(shared_symm_key, deserialized[0])
             elif self.__is_rsa(self.__loaded_private_preferred_cipher):
                 result = self.__crypto_context.decrypt(self.__loaded_private_preferred_key, deserialized[0])
             else:
@@ -322,10 +325,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __get_or_download_public_key(self, key_id: str, cfg: p.CryptoConfig =None) -> p.Key:
         #FIXME: should we really use default symm cipher all the time?
         if (self.persister.exists(key_id)):
-            if cfg:
-                return p.Key(p.SymmetricCipher(cfg.symm_cipher), self.persister.load(key_id), False)
-            else:
-                return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
+            return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
 
         key_service_api = KeyServiceApi(self.__get_client())
 
@@ -336,10 +336,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.persister.save(key_id, pub_key.key)
 
-        if cfg:
-            return p.Key(p.SymmetricCipher(cfg.symm_cipher), pub_key.key, False)
-        else:
-            return p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
+        return p.Key(DEFAULT_SYMM_CIPHER, pub_key.key, False)
 
 
     def register(self):
@@ -385,7 +382,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __domain_is_valid_for_encryption(self, domain: SymmetricKeyUseDomain) -> bool:
         now_in_seconds = int(round(time.time()))
-        return domain.creation_time + domain.symmetric_key_decryption_use_ttl > now_in_seconds \
+        return domain.creation_time + domain.symmetric_key_encryption_use_ttl > now_in_seconds \
                and domain.creation_time + domain.symmetric_key_inception_ttl <= now_in_seconds
 
     def __select_use_domain_name(self) -> str:
@@ -431,6 +428,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
+        # check input is actualy a key, ow fail safe
+        # log warning and use default sym algo
         select_cipher = {
             self.__Chacha20Poly1305: p.SymmetricCipher.CHACHA20_POLY1305,
             self.__Aes128gcm: p.SymmetricCipher.AES_128_GCM,
@@ -446,6 +445,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if self.__loaded_private_preferred_key != None:
             return self.__loaded_private_preferred_key
 
+        # change to getter (same for decrypt_and_save)
         private_pem = self.persister.load(PERSISTER_PRIV_KEY)
         self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, private_pem)
         self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), int(self.persister.load(PERSISTER_ASYM_BITLEN)))
@@ -453,6 +453,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.__loaded_private_preferred_key
 
     def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
+        # also use dictionary
         if digest_algorithm == self.__Sha224:
             return p.DigestAlgorithm.SHA_224
         elif digest_algorithm == self.__Sha256:
@@ -463,9 +464,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return p.DigestAlgorithm.SHA_512
         else:
             # TODO : Handle logger.
+            # TODO: define DEFAULT_MESSAGE_DIGEST
             return DEFAULT_MESSAGE_DIGEST
 
     def encrypt(self, plain_text: bytes) -> bytes:
+        #TODO: assert using isinstance not type
         self.__verify_bootstrapped_and_registered()
         used_domain_name = self.__select_use_domain_name()
         return self.encrypt_in_domain(plain_text, used_domain_name.name)
@@ -479,28 +482,24 @@ class CryptoImpl(PeacemakrCryptoSDK):
         signing_key = self.__get_signing_key(use_domain_for_encryption)
         digest = self.__get_digest_alg(use_domain_for_encryption.digest_algorithm)
 
-        key = None
-        try:
-            key = p.Key(symmetric_cipher, self.__get_key(encryption_key_id_for_encryption))
-        except Exception as e:
-            raise PersistenceLayerCorruptionDetectedError(e)
+        key = p.Key(symmetric_cipher, self.__get_key(encryption_key_id_for_encryption))
 
+        # FIXME persister preferred keyid can cause delay if persister read from disk
         aad = CiphertextAAD(encryption_key_id_for_encryption, self.persister.load(PERSISTER_PREFERRED_KEYID))
         json_bytes = bytes(json.dumps(aad.__dict__), encoding='utf8')
-        pm_plain_text = p.Plaintext(plain_text, base64.b64encode(json_bytes))
+        pm_plain_text = p.Plaintext(plain_text, json_bytes)
         random_device = p.RandomDevice()
 
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
-        try:
-            self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text)
-        except Exception as e:
-            raise CoreCryptoError('Incapable of signing data')
+
+        self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text)
+
 
         return self.__crypto_context.serialize(digest, cipher_text)
 
 
     def __parse_cipher_text_AAD(self, aad: str) -> CiphertextAAD:
-        j = json.loads(base64.b64decode(aad))
+        j = json.loads(aad)
         return CiphertextAAD(**j)
 
     def __verify_message(self, aad: CiphertextAAD, cfg: p.CryptoConfig, ciphertext, plaintext: p.Plaintext) -> bool:
@@ -528,16 +527,12 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if not self.__is_key_id_decryption_viable(aad.cryptoKeyID):
             raise NoValidUseDomainsForDecryptionError('Ciphertext is no longer viable for decryption')
 
-        key = None
-        try:
-            key = self.__get_key(aad.cryptoKeyID)
-        except Exception as e:
-            raise PersistenceLayerCorruptionDetectedError(e)
+        key = self.__get_key(aad.cryptoKeyID)
 
         pmKey = p.Key(p.SymmetricCipher(cfg.symm_cipher), key)
         plain_text, need_verification = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
         if need_verification:
             if not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
-                raise CoreCryptoError('Problem verifying')
+                raise CoreCryptoError('Verification Failed')
 
-        return plain_text.data.encode()
+        return plain_text.data.encode(encoding='UTF-8')
