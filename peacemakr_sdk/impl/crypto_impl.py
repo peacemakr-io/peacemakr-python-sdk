@@ -106,7 +106,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
         except ApiException as e:
-            raise ServerException(e)
+            raise ServerError(e)
 
     def __load_crypto_config(self, api_client: ApiClient):
         # TODO: add exception
@@ -114,7 +114,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
         except ApiException as e:
-            raise ServerException(e)
+            raise ServerError(e)
 
     def __get_client(self) -> ApiClient:
         ''' set up api client
@@ -205,7 +205,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             public_key = client_api.add_client_public_key(self.__client.id, public_key)
         except ApiException as e:
-            raise ServerException(e)
+            raise ServerError(e)
 
         self.__save_new_asymmetric_key_pair(temp_in_memory_persister, self.persister)
         self.persister.save(PERSISTER_PREFERRED_KEYID, public_key.id)
@@ -249,7 +249,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             self.__decrypt_and_save(all_keys)
             #self.persister.debug()
         except ApiException as e:
-            raise ServerException(e)
+            raise ServerError(e)
 
 
 
