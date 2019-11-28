@@ -54,6 +54,11 @@ def random_index(l: list):
 
 class CryptoImpl(PeacemakrCryptoSDK):
     def __init__(self, api_key="", client_name="", peacemakr_hostname="", persister=None, logger=None):
+        assert isinstance(api_key, str)
+        assert isinstance(client_name, str)
+        assert isinstance(peacemakr_hostname, str)
+        assert persister is None or isinstance(persister, Persister)
+        assert logger is None or isinstance(logger, Logger)
         self.api_key = api_key
         self.client_name = client_name
         self.sdk_version = "0.0.1"
@@ -102,6 +107,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__load_crypto_config(api_client)
 
     def __load_org(self, api_client: ApiClient):
+        assert isinstance(api_client, ApiClient)
         # TODO: add exception
         org_api = OrgApi(api_client=api_client)
         try:
@@ -111,6 +117,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __load_crypto_config(self, api_client: ApiClient):
         # TODO: add exception
+        assert isinstance(api_client, ApiClient)
         crypto_config_api = CryptoConfigApi(api_client=api_client)
         try:
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
@@ -137,6 +144,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     # Key Related functions
     def __gen_new_asymmetric_keypair(self, persister: Persister) -> PublicKey:
+        assert isinstance(persister, Persister)
         rand = p.RandomDevice()
 
         symm_cipher = DEFAULT_SYMM_CIPHER
@@ -167,6 +175,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return pub_key
 
     def __get_asymmetric_cipher(self, key_type: str, bit_length: int) -> p.AsymmetricCipher:
+        assert isinstance(key_type, str)
+        assert isinstance(bit_length, int)
         prefix_dict = {
             "ec" : "ECDH_P",
             "rsa": "RSA_"
@@ -191,7 +201,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
 
 
-    def __save_new_asymmetric_key_pair(self, src: InMemoryPersister, dst: InMemoryPersister):
+    def __save_new_asymmetric_key_pair(self, src: Persister, dst: Persister):
+        assert isinstance(src, Persister)
+        assert isinstance(to, Persister)
+
         dst.save(PERSISTER_PRIV_KEY, src.load(PERSISTER_PRIV_KEY))
         dst.save(PERSISTER_PUB_KEY, src.load(PERSISTER_PUB_KEY))
         dst.save(PERSISTER_ASYM_TYPE, src.load(PERSISTER_ASYM_TYPE))
@@ -213,7 +226,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __update_local_crypto_config(self, new_config: p.CryptoConfig):
-
+        assert isinstance(new_config, p.CryptoConfig)
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
         if not new_config.client_key_type == cur_asymmetric_key_type:
             #FIXME: add logger
@@ -240,6 +253,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.crypto_config = new_config
 
     def __download_and_save_all_keys(self, required_keys: list =[]):
+        assert isinstance(required_keys, list)
         ''' calls keyServiceApi to get all the encrypted keys just generated from the key deriver
         '''
         key_api = KeyServiceApi(api_client=self.__get_client())
@@ -254,6 +268,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __decrypt_and_save(self, all_keys: list):
+        assert isinstance(all_keys, list)
         ''' decryptes the encrypted symmetric keys and save them to persister
         '''
         # move to bootstrap and refactor into getter function
@@ -270,7 +285,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
                 # raise exception
                 print('Failed to get raw ciphertext str from EncryptedSymmetricKey')
 
-            # deserialized[0] is a pycapsule object that decrypt takes in, 
+            # deserialized[0] is a pycapsule object that decrypt takes in,
             # deseralized[1] is the config (sym cipher, asym cipher, digest algo, and mode)
             deserialized = self.__crypto_context.deserialize(raw_cipher_text_str)
 
@@ -313,16 +328,19 @@ class CryptoImpl(PeacemakrCryptoSDK):
                 self.persister.save(key.key_ids[i], key_in_bytes)
 
     def __is_ec(self, cipher: p.AsymmetricCipher) -> bool:
+        assert isinstance(cipher, p.AsymmetricCipher)
         if cipher in {p.AsymmetricCipher.ECDH_P256, p.AsymmetricCipher.ECDH_P384, p.AsymmetricCipher.ECDH_P521}:
             return True
         return False
 
     def __is_rsa(self, cipher: p.AsymmetricCipher) -> bool:
+        assert isinstance(cipher, p.AsymmetricCipher)
         if cipher in {p.AsymmetricCipher.RSA_2048, p.AsymmetricCipher.RSA_4096}:
             return True
         return False
 
-    def __get_or_download_public_key(self, key_id: str, cfg: p.CryptoConfig =None) -> p.Key:
+    def __get_or_download_public_key(self, key_id: str) -> p.Key:
+        assert isinstance(key_id, str)
         #FIXME: should we really use default symm cipher all the time?
         if (self.persister.exists(key_id)):
             return p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(key_id), False)
@@ -381,6 +399,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__download_and_save_all_keys()
 
     def __domain_is_valid_for_encryption(self, domain: SymmetricKeyUseDomain) -> bool:
+        assert isinstance(domain, SymmetricKeyUseDomain)
         now_in_seconds = int(round(time.time()))
         return domain.creation_time + domain.symmetric_key_encryption_use_ttl > now_in_seconds \
                and domain.creation_time + domain.symmetric_key_inception_ttl <= now_in_seconds
@@ -395,6 +414,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return random_index(valid_for_encryption)
 
     def __get_valid_use_domain_for_encryption(self, use_domain_name: str) -> SymmetricKeyUseDomain:
+        assert isinstance(use_domain_name, str)
         use_domains = self.crypto_config.symmetric_key_use_domains
         valid_domain_with_this_name = []
         # TODO : Handle logger call.
@@ -414,9 +434,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return random_index(valid_domain_with_this_name)
 
     def __get_encryption_key_id(self, use_domain: SymmetricKeyUseDomain) -> str:
+        assert isinstance(use_domain, SymmetricKeyUseDomain)
         return random_index(use_domain.encryption_key_ids)
 
     def __get_key(self, key_id: str) -> bytes:
+        assert isinstance(key_id, str)
         if self.persister.exists(key_id):
             return self.persister.load(key_id)
 
@@ -428,6 +450,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
+        assert isinstance(symmetric_key_encryption_alg, str)
         # check input is actualy a key, ow fail safe
         # log warning and use default sym algo
         select_cipher = {
@@ -439,6 +462,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return select_cipher[symmetric_key_encryption_alg]
 
     def __get_signing_key(self, use_domain: SymmetricKeyUseDomain) -> p.Key:
+        assert isinstance(use_domain, SymmetricKeyUseDomain)
         if use_domain.digest_algorithm is None:
             return None
 
@@ -453,6 +477,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.__loaded_private_preferred_key
 
     def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
+        assert isinstance(digest_algorithm, str)
         # also use dictionary
         if digest_algorithm == self.__Sha224:
             return p.DigestAlgorithm.SHA_224
@@ -468,12 +493,16 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return DEFAULT_MESSAGE_DIGEST
 
     def encrypt(self, plain_text: bytes) -> bytes:
+        assert isinstance(plain_text, bytes)
         #TODO: assert using isinstance not type
         self.__verify_bootstrapped_and_registered()
         used_domain_name = self.__select_use_domain_name()
         return self.encrypt_in_domain(plain_text, used_domain_name.name)
 
     def encrypt_in_domain(self, plain_text: bytes, use_domain_name: str) -> bytes:
+        assert isinstance(plain_text, bytes)
+        assert isinstance(use_domain_name, str)
+
         self.__verify_bootstrapped_and_registered()
         use_domain_for_encryption = self.__get_valid_use_domain_for_encryption(use_domain_name)
         encryption_key_id_for_encryption = self.__get_encryption_key_id(use_domain_for_encryption)
@@ -494,16 +523,21 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text)
 
-
-        return self.__crypto_context.serialize(digest, cipher_text)
+        return self.__crypto_context.serialize(digest, cipher_text).encode(encoding='UTF-8')
 
 
     def __parse_cipher_text_AAD(self, aad: str) -> CiphertextAAD:
+        assert isinstance(aad, str)
         j = json.loads(aad)
         return CiphertextAAD(**j)
 
     def __verify_message(self, aad: CiphertextAAD, cfg: p.CryptoConfig, ciphertext, plaintext: p.Plaintext) -> bool:
-        sender_key = self.__get_or_download_public_key(aad.senderKeyID, cfg)
+        assert isinstance(aad, CiphertextAAD)
+        assert isinstance(cfg, p.CryptoConfig)
+        # FIXME: figure out import for this
+        # assert isinstance(ciphertext, PyCapsule)
+        assert isinstance(plaintext, p.Plaintext)
+        sender_key = self.__get_or_download_public_key(aad.senderKeyID)
         return self.__crypto_context.verify(sender_key, plaintext, ciphertext)
 
     def __find_viable_decryption_use_domains(self) -> list:
@@ -512,6 +546,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return viable_domains
 
     def __is_key_id_decryption_viable(self, key_id: str) -> bool:
+        assert isinstance(key_id, str)
         viable_decryption_domains = self.__find_viable_decryption_use_domains()
         for domain in viable_decryption_domains:
             if key_id in domain.encryption_key_ids:
@@ -519,6 +554,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return False
 
     def decrypt(self, cipher_text: bytes) -> bytes:
+        assert isinstance(cipher_text, bytes)
         self.__verify_bootstrapped_and_registered()
 
         cipher_text_blob, cfg = self.__crypto_context.deserialize(cipher_text)
