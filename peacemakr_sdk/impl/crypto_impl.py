@@ -48,6 +48,7 @@ PERSISTER_PREFERRED_KEYID = "PreferredKeyId"
 PERSISTER_APIKEY_KEY = "ApiKey"
 
 DEFAULT_SYMM_CIPHER = p.SymmetricCipher.CHACHA20_POLY1305
+DEFAULT_MESSAGE_DIGEST = p.DigestAlgorithm.SHA_256
 
 def random_index(l: list):
     return l[randint(0, len(l) - 1)]
@@ -80,13 +81,18 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__Sha384 = "SHA_384"
         self.__Sha512 = "SHA_512"
 
+    def __bootsrapped_private_preferred_key_and_cipher(self):
+        self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
+        self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
+
     def __is_registered(self) -> bool:
-        ## TODO: save things to persister
         return  self.persister.exists(PERSISTER_PREFERRED_KEYID)\
             and self.persister.exists(PERSISTER_CLIENTID_KEY)\
             and self.persister.exists(PERSISTER_PRIV_KEY)\
             and self.persister.exists(PERSISTER_PUB_KEY)\
-            and self.persister.exists(PERSISTER_ASYM_TYPE)
+            and self.persister.exists(PERSISTER_ASYM_TYPE)\
+            and self.__loaded_private_preferred_key != None\
+            and self.__loaded_private_preferred_cipher != None
 
     def __is_bootstrapped(self) -> bool:
         return self.org != None and self.crypto_config != None and self.__client != None
@@ -102,7 +108,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__load_crypto_config(api_client)
 
     def __load_org(self, api_client: ApiClient):
-        # TODO: add exception
         org_api = OrgApi(api_client=api_client)
         try:
             self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
@@ -110,7 +115,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise ServerError(e)
 
     def __load_crypto_config(self, api_client: ApiClient):
-        # TODO: add exception
         crypto_config_api = CryptoConfigApi(api_client=api_client)
         try:
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
@@ -124,8 +128,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return self.__api_client
 
         if self.api_key == "":
-            # raise Exception
-            return None
+            raise MissingAPIKeyError("Missing API Key")
 
         configuration = Configuration()
         configuration.api_key['authorization'] = self.api_key
@@ -191,7 +194,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
 
 
-    def __save_new_asymmetric_key_pair(self, src: InMemoryPersister, dst: InMemoryPersister):
+    def __save_new_asymmetric_key_pair(self, src: InMemoryPersister, dst: Persister):
         dst.save(PERSISTER_PRIV_KEY, src.load(PERSISTER_PRIV_KEY))
         dst.save(PERSISTER_PUB_KEY, src.load(PERSISTER_PUB_KEY))
         dst.save(PERSISTER_ASYM_TYPE, src.load(PERSISTER_ASYM_TYPE))
@@ -256,19 +259,20 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __decrypt_and_save(self, all_keys: list):
         ''' decryptes the encrypted symmetric keys and save them to persister
         '''
-        # move to bootstrap and refactor into getter function
-        if (self.__loaded_private_preferred_key == None):
-            self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
-            self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
+        # loaded private preferred key should be loaded at boostrap
+        if self.__loaded_private_preferred_key == None:
+            raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
 
         for key in all_keys:
             if key == None:
+                # add logger
                 continue
 
             raw_cipher_text_str = key.packaged_ciphertext
             if raw_cipher_text_str == None:
-                # raise exception
+                # add logger
                 print('Failed to get raw ciphertext str from EncryptedSymmetricKey')
+                continue
 
             # deserialized[0] is a pycapsule object that decrypt takes in, 
             # deseralized[1] is the config (sym cipher, asym cipher, digest algo, and mode)
@@ -341,11 +345,13 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def register(self):
         # check is register and is boostrap, if not initialize
-        try:
-            self.__verify_bootstrapped_and_registered()
-        except Exception as e:
-            self.__do_bootstrap_org_and_crypto_config()
+        if self.__is_registered():
+            if not self.__is_bootstrapped():
+                self.__do_bootstrap_org_and_crypto_config()
+            # add logger
+            return
 
+        self.__do_bootstrap_org_and_crypto_config()
         # generate new asymmetric client keypair and then store info in persistor
         pub_key = self.__gen_new_asymmetric_keypair(self.persister)
 
@@ -362,7 +368,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__client = new_client
 
         # FIXME: add client checks like in Java?
-
+        self.__bootsrapped_private_preferred_key_and_cipher()
         self.persister.save(PERSISTER_CLIENTID_KEY, self.__client.id)
         self.persister.save(PERSISTER_PREFERRED_KEYID, self.__client.public_keys[0].id)
 
@@ -445,10 +451,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if self.__loaded_private_preferred_key != None:
             return self.__loaded_private_preferred_key
 
-        # change to getter (same for decrypt_and_save)
-        private_pem = self.persister.load(PERSISTER_PRIV_KEY)
-        self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, private_pem)
-        self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), int(self.persister.load(PERSISTER_ASYM_BITLEN)))
+        # the loaded private preferred key should be loaded at registered
+        if self.__loaded_private_preferred_key == None:
+            raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
 
         return self.__loaded_private_preferred_key
 
@@ -464,7 +469,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return p.DigestAlgorithm.SHA_512
         else:
             # TODO : Handle logger.
-            # TODO: define DEFAULT_MESSAGE_DIGEST
             return DEFAULT_MESSAGE_DIGEST
 
     def encrypt(self, plain_text: bytes) -> bytes:
