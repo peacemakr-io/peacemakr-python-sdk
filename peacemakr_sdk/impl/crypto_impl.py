@@ -49,6 +49,7 @@ PERSISTER_APIKEY_KEY = "ApiKey"
 
 DEFAULT_SYMM_CIPHER = p.SymmetricCipher.CHACHA20_POLY1305
 DEFAULT_MESSAGE_DIGEST = p.DigestAlgorithm.SHA_256
+MAX_ELASPED_TIME = 60 * 60 * 24
 
 def random_index(l: list):
     return l[randint(0, len(l) - 1)]
@@ -81,6 +82,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__Sha384 = "SHA_384"
         self.__Sha512 = "SHA_512"
 
+        self.__last_updated_time = None
+
     def __bootsrapped_private_preferred_key_and_cipher(self):
         self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
         self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
@@ -96,6 +99,15 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __is_bootstrapped(self) -> bool:
         return self.org != None and self.crypto_config != None and self.__client != None
+
+    def __update_config_by_elasped_time(self, max_elasped_time=60*60*24):
+        ''' update the config if program elasped more than `max_elasped_time` since the last update
+        '''
+        now = time.time()
+        if (now - self.__last_updated_time) > max_elasped_time:
+            # add logger
+            self.sync()
+            self.__last_updated_time = time.time()
 
     def __do_bootstrap_org_and_crypto_config(self):
         # set up org, api_client, and crypto_config
@@ -248,8 +260,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         key_api = KeyServiceApi(api_client=self.__get_client())
         try:
             all_keys = key_api.get_all_encrypted_keys(self.__client.preferred_public_key_id, symmetric_key_ids=required_keys)
-            if not len(all_keys):
-                raise ApiException('Empty key list')
+
             self.__decrypt_and_save(all_keys)
         except ApiException as e:
             raise ServerError(e)
@@ -371,6 +382,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__bootsrapped_private_preferred_key_and_cipher()
         self.persister.save(PERSISTER_CLIENTID_KEY, self.__client.id)
         self.persister.save(PERSISTER_PREFERRED_KEYID, self.__client.public_keys[0].id)
+        self.__last_updated_time = time.time()
 
 
     def sync(self):
@@ -474,11 +486,13 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def encrypt(self, plain_text: bytes) -> bytes:
         #TODO: assert using isinstance not type
         self.__verify_bootstrapped_and_registered()
+        self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
         used_domain_name = self.__select_use_domain_name()
         return self.encrypt_in_domain(plain_text, used_domain_name.name)
 
     def encrypt_in_domain(self, plain_text: bytes, use_domain_name: str) -> bytes:
         self.__verify_bootstrapped_and_registered()
+        self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
         use_domain_for_encryption = self.__get_valid_use_domain_for_encryption(use_domain_name)
         encryption_key_id_for_encryption = self.__get_encryption_key_id(use_domain_for_encryption)
 
@@ -524,6 +538,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def decrypt(self, cipher_text: bytes) -> bytes:
         self.__verify_bootstrapped_and_registered()
+        self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
 
         cipher_text_blob, cfg = self.__crypto_context.deserialize(cipher_text)
         aad = self.__crypto_context.extract_unverified_aad(cipher_text).aad
