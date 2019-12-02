@@ -60,3 +60,5 @@ from peacemakr_sdk.exception.peacemakr import PeacemakrError
 
 # import impl into sdk package
 from peacemakr_sdk.impl.crypto_impl import CryptoImpl
+
+from peacemakr_sdk.factory import get_crypto_sdk
