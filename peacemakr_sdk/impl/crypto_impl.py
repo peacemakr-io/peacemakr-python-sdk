@@ -87,6 +87,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__crypto_context = p.CryptoContext()
 
         self.__last_updated_time = None
+        self.__sym_key_cache = dict()
 
     def __bootsrapped_private_preferred_key_and_cipher(self):
         self.__loaded_private_preferred_cipher = self.__get_asymmetric_cipher(self.persister.load(PERSISTER_ASYM_TYPE), self.persister.load(PERSISTER_ASYM_BITLEN))
@@ -349,8 +350,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
             need_verfication = result[1]
             # check verfication
             if need_verfication:
-                verfied = self.__crypto_context.verify(verification_key, result[0], deserialized[0])
-                if verfied == False:
+                verified = self.__crypto_context.verify(verification_key, result[0], deserialized[0])
+                if verified == False:
                     raise CoreCryptoError('Verification step failed')
 
             keys_in_str = result[0].data
@@ -360,6 +361,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             for i in range(len(key.key_ids)):
                 # loop thru each key id and save their respective keys
                 key_in_bytes = keys_in_bytes[i*key_len:(i+1)*key_len]
+                self.__sym_key_cache[key.key_ids[i]] = key_in_bytes
                 self.persister.save(key.key_ids[i], key_in_bytes)
 
     def __is_ec(self, cipher: p.AsymmetricCipher) -> bool:
@@ -464,6 +466,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __get_key(self, key_id: str) -> bytes:
         assert isinstance(key_id, str)
+
+        if key_id in self.__sym_key_cache:
+            return self.__sym_key_cache[key_id]
+
         if self.persister.exists(key_id):
             return self.persister.load(key_id)
 
@@ -471,6 +477,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if not self.persister.exists(key_id):
             raise FailedToDownloadKeyError('KeyID: {}'.format(key_id))
         # TODO : Handle persister missing keys exception.
+
         return self.persister.load(key_id)
 
 
@@ -480,10 +487,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if use_domain.digest_algorithm is None:
             return None
 
-        if self.__loaded_private_preferred_key != None:
-            return self.__loaded_private_preferred_key
-
-        # the loaded private preferred key should be loaded at registered
         if self.__loaded_private_preferred_key == None:
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
 
@@ -568,11 +571,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise NoValidUseDomainsForDecryptionError('Ciphertext is no longer viable for decryption')
 
         key = self.__get_key(aad.cryptoKeyID)
-
         pmKey = p.Key(p.SymmetricCipher(cfg.symm_cipher), key)
         plain_text, need_verification = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
-        if need_verification:
-            if not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
-                raise CoreCryptoError('Verification Failed')
+        if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
+            raise CoreCryptoError('Verification Failed')
 
         return plain_text.data.encode(encoding='UTF-8')
