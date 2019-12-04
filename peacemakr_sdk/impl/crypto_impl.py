@@ -32,6 +32,8 @@ from peacemakr_sdk.persister_base import Persister
 import peacemakr_core_crypto_python as p
 
 from random import randint
+from functools import reduce
+import logging
 import time
 import json
 import base64
@@ -52,6 +54,7 @@ DEFAULT_MESSAGE_DIGEST = p.DigestAlgorithm.SHA_256
 MAX_ELASPED_TIME = 60 * 60 * 24
 
 def random_index(l: list):
+    assert isinstance(l, list) and len(l)
     return l[randint(0, len(l) - 1)]
 
 class CryptoImpl(PeacemakrCryptoSDK):
@@ -59,8 +62,14 @@ class CryptoImpl(PeacemakrCryptoSDK):
         assert isinstance(api_key, str)
         assert isinstance(client_name, str)
         assert isinstance(peacemakr_hostname, str)
-        assert persister is None or isinstance(persister, Persister)
         assert logger is None or isinstance(logger, Logger)
+        if not client_name:
+            raise MissingClientNameError("A client name is required")
+        if not api_key:
+            raise MissingAPIKeyError("An API key is required")
+        if not persister or not isinstance(persister, Persister):
+            raise MissingPersisterError("A persister is required")
+
         self.api_key = api_key
         self.client_name = client_name
         self.sdk_version = "0.0.1"
@@ -76,16 +85,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__loaded_private_preferred_key = None
         self.__loaded_private_preferred_cipher = None
         self.__crypto_context = p.CryptoContext()
-
-        self.__Chacha20Poly1305 = "CHACHA20_POLY1305"
-        self.__Aes128gcm = "AES-128-GCM"
-        self.__Aes192gcm = "AES-192-GCM"
-        self.__Aes256gcm = "AES-256-GCM"
-
-        self.__Sha224 = "SHA_224"
-        self.__Sha256 = "SHA_256"
-        self.__Sha384 = "SHA_384"
-        self.__Sha512 = "SHA_512"
 
         self.__last_updated_time = None
 
@@ -105,7 +104,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __is_bootstrapped(self) -> bool:
         return self.org != None and self.crypto_config != None and self.__client != None
 
-    def __update_config_by_elasped_time(self, max_elasped_time=60*60*24):
+    def __update_config_by_elasped_time(self, max_elasped_time: int = 60*60*24):
         ''' update the config if program elasped more than `max_elasped_time` since the last update
         '''
         now = time.time()
@@ -141,8 +140,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise ServerError(e)
 
     def __get_client(self) -> ApiClient:
-        ''' set up api client
-        '''
         if self.__api_client != None:
             return self.__api_client
 
@@ -157,7 +154,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.persister.save(PERSISTER_APIKEY_KEY, self.api_key)
         return self.__api_client
 
-    # Key Related functions
     def __gen_new_asymmetric_keypair(self, persister: Persister) -> PublicKey:
         assert isinstance(persister, Persister)
         rand = p.RandomDevice()
@@ -170,7 +166,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         pub_pem = key.get_pub_pem()
         priv_pem = key.get_priv_pem()
 
-        # FIXME: In python3 int are unbounded, we can check the word size if that's useful
         created_time = int(round(time.time()))
         if created_time > sys.maxsize:
             raise UnrecoverableClockSkewDetectedError('Failed to detect a valid time for local asymmetric key creation time.')
@@ -192,11 +187,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __get_asymmetric_cipher(self, key_type: str, bit_length: int) -> p.AsymmetricCipher:
         assert isinstance(key_type, str)
         assert isinstance(bit_length, int)
+
         prefix_dict = {
             "ec" : "ECDH_P",
             "rsa": "RSA_"
         }
-
         asymm_dict = {
             "RSA_2048": p.AsymmetricCipher.RSA_2048,
             "RSA_4096": p.AsymmetricCipher.RSA_4096,
@@ -204,17 +199,43 @@ class CryptoImpl(PeacemakrCryptoSDK):
             "ECDH_P384": p.AsymmetricCipher.ECDH_P384,
             "ECDH_P521": p.AsymmetricCipher.ECDH_P521,
         }
-
         prefix = prefix_dict[key_type.lower()]
         asymm_key = '{}{}'.format(prefix, bit_length)
 
+        if asymm_key not in asymm_dict:
+            logging.warning('{} is not currently supported by Peacemakr. Going to default ECDH_P521'.format(asymm_key))
+            return p.AsymmetricCipher.ECDH_P521
         return asymm_dict[asymm_key]
 
+    def __get_symmetric_cipher(self, symmetric_alg: str) -> p.SymmetricCipher:
+        assert isinstance(symmetric_alg, str)
+        select_cipher = {
+            "CHACHA20_POLY1305": p.SymmetricCipher.CHACHA20_POLY1305,
+            "AES-128-GCM": p.SymmetricCipher.AES_128_GCM,
+            "AES-192-GCM": p.SymmetricCipher.AES_192_GCM,
+            "AES-256-GCM": p.SymmetricCipher.AES_256_GCM,
+        }
+        if symmetric_alg not in select_cipher:
+            logging.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(symmetric_alg, DEFAULT_SYMM_CIPHER))
+            return DEFAULT_SYMM_CIPHER
+        return select_cipher[symmetric_alg]
+
+    def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
+        assert isinstance(digest_algorithm, str)
+        select_digest = {
+            "SHA_224" : p.DigestAlgorithm.SHA_224,
+            "SHA_256" : p.DigestAlgorithm.SHA_256,
+            "SHA_384" : p.DigestAlgorithm.SHA_384,
+            "SHA_512" : p.DigestAlgorithm.SHA_512,
+        }
+        if digest_algorithm not in select_digest:
+            logging.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(digest_algorithm, DEFAULT_MESSAGE_DIGEST))
+            return DEFAULT_MESSAGE_DIGEST
+        return select_digest[digest_algorithm]
 
     def __verify_bootstrapped_and_registered(self):
         if not self.__is_registered() or not self.__is_bootstrapped():
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
-
 
     def __save_new_asymmetric_key_pair(self, src: Persister, dst: Persister):
         assert isinstance(src, Persister)
@@ -422,33 +443,20 @@ class CryptoImpl(PeacemakrCryptoSDK):
                and domain.creation_time + domain.symmetric_key_inception_ttl <= now_in_seconds
 
     def __select_use_domain_name(self) -> str:
-        valid_for_encryption = []
-        for domain in self.crypto_config.symmetric_key_use_domains:
-            if self.__domain_is_valid_for_encryption(domain):
-                valid_for_encryption.append(domain)
-        if not valid_for_encryption:
-            return None
-        return random_index(valid_for_encryption)
+        domains = self.crypto_config.symmetric_key_use_domains
+        valid_for_encryption = [d for d in domains if self.__domain_is_valid_for_encryption(d)]
+        return random_index(valid_for_encryption) if valid_for_encryption else None
 
     def __get_valid_use_domain_for_encryption(self, use_domain_name: str) -> SymmetricKeyUseDomain:
         assert isinstance(use_domain_name, str)
-        use_domains = self.crypto_config.symmetric_key_use_domains
-        valid_domain_with_this_name = []
+        domains = self.crypto_config.symmetric_key_use_domains
         # TODO : Handle logger call.
-
-        for domain in use_domains:
-            if domain.name != use_domain_name:
-                continue
-            if not self.__domain_is_valid_for_encryption(domain):
-                continue
-            if not domain.encryption_key_ids:
-                continue
-            valid_domain_with_this_name.append(domain)
-
-        if not valid_domain_with_this_name:
+        domains = list(filter(lambda d: d.name == use_domain_name, domains))
+        domains = [d for d in domains if self.__domain_is_valid_for_encryption(d) and d.encryption_key_ids]
+        if not domains:
             raise NoValidUseDomainsForEncryptionError("No valid use domain for encryption found, with the name " + use_domain_name)
 
-        return random_index(valid_domain_with_this_name)
+        return random_index(domains)
 
     def __get_encryption_key_id(self, use_domain: SymmetricKeyUseDomain) -> str:
         assert isinstance(use_domain, SymmetricKeyUseDomain)
@@ -466,17 +474,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.persister.load(key_id)
 
 
-    def __get_symmetric_cipher(self, symmetric_key_encryption_alg: str) -> p.SymmetricCipher:
-        assert isinstance(symmetric_key_encryption_alg, str)
-        # check input is actualy a key, ow fail safe
-        # log warning and use default sym algo
-        select_cipher = {
-            self.__Chacha20Poly1305: p.SymmetricCipher.CHACHA20_POLY1305,
-            self.__Aes128gcm: p.SymmetricCipher.AES_128_GCM,
-            self.__Aes192gcm: p.SymmetricCipher.AES_192_GCM,
-            self.__Aes256gcm: p.SymmetricCipher.AES_256_GCM,
-        }
-        return select_cipher[symmetric_key_encryption_alg]
 
     def __get_signing_key(self, use_domain: SymmetricKeyUseDomain) -> p.Key:
         assert isinstance(use_domain, SymmetricKeyUseDomain)
@@ -492,24 +489,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         return self.__loaded_private_preferred_key
 
-    def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
-        assert isinstance(digest_algorithm, str)
-        # also use dictionary
-        if digest_algorithm == self.__Sha224:
-            return p.DigestAlgorithm.SHA_224
-        elif digest_algorithm == self.__Sha256:
-            return p.DigestAlgorithm.SHA_256
-        elif digest_algorithm == self.__Sha384:
-            return p.DigestAlgorithm.SHA_384
-        elif digest_algorithm == self.__Sha512:
-            return p.DigestAlgorithm.SHA_512
-        else:
-            # TODO : Handle logger.
-            return DEFAULT_MESSAGE_DIGEST
+
 
     def encrypt(self, plain_text: bytes) -> bytes:
         assert isinstance(plain_text, bytes)
-        #TODO: assert using isinstance not type
+
         self.__verify_bootstrapped_and_registered()
         self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
         used_domain_name = self.__select_use_domain_name()
@@ -538,7 +522,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
 
-        self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text)
+        if not self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text):
+            logging.warning('Signing failed. Verification not required when decrypting.')
 
         return self.__crypto_context.serialize(digest, cipher_text).encode(encoding='UTF-8')
 
@@ -551,9 +536,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __verify_message(self, aad: CiphertextAAD, cfg: p.CryptoConfig, ciphertext, plaintext: p.Plaintext) -> bool:
         assert isinstance(aad, CiphertextAAD)
         assert isinstance(cfg, p.CryptoConfig)
+        assert isinstance(plaintext, p.Plaintext)
         # FIXME: figure out import for this
         # assert isinstance(ciphertext, PyCapsule)
-        assert isinstance(plaintext, p.Plaintext)
+
         sender_key = self.__get_or_download_public_key(aad.senderKeyID)
         return self.__crypto_context.verify(sender_key, plaintext, ciphertext)
 
