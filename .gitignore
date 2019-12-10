@@ -65,3 +65,7 @@ target/
 
 # swagger ignore
 .swagger-codegen-ignore
+
+# generated files
+*.txt
+example.py

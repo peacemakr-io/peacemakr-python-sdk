@@ -1,0 +1,39 @@
+FROM python:3.7.4-alpine as builder
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash make git curl g++ perl gcc musl-dev libbsd-dev ca-certificates && \
+    update-ca-certificates
+
+RUN wget "https://www.openssl.org/source/openssl-1.1.1d.tar.gz" && \
+    tar -zxf openssl-1.1.1d.tar.gz && cd openssl-1.1.1d && \
+    ./config && make && make install && \
+    cd / && rm -rf openssl-1.1.1d && rm openssl-1.1.1d.tar.gz
+
+RUN wget "https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.0.tar.gz" && \
+    tar -zxf cmake-3.16.0.tar.gz && cd cmake-3.16.0 && \
+    ./bootstrap && make && make install && \
+    cd / && rm -rf cmake-3.16.0 && rm cmake-3.16.0.tar.gz
+
+WORKDIR /peacemakr
+ADD requirements.txt \
+    examples/example.py \
+    setup.py ./python/
+ADD peacemakr_sdk ./python/peacemakr_sdk/
+
+WORKDIR /peacemakr/python
+RUN bash && pip install --upgrade pip \
+    && pip install -r requirements.txt \
+    && python setup.py install
+
+FROM python:3.7.4-alpine
+WORKDIR /peacemakr/python
+COPY --from=builder /peacemakr/python .
+COPY --from=builder /usr/lib /usr/lib
+COPY --from=builder /usr/local/lib /usr/local/lib
+ADD test-requirements.txt .
+ADD run_tests.sh .
+ADD test .
+ENV LD_LIBRARY_PATH=/usr/local/lib
+RUN pip install --no-cache-dir -r test-requirements.txt
+
+CMD ./run_tests.sh
