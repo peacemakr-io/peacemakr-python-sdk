@@ -36,8 +36,6 @@ REQUIRES = [
     "urllib3>=1.23"
 ]
 
-# subprocess.call("./scripts/install_core_crypto")
-
 class InstallCoreCryptoCommand(distutils.cmd.Command):
   """A custom command to run Pylint on all Python source files."""
 
