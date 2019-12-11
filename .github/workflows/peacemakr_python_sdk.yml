@@ -41,9 +41,9 @@ jobs:
         run: |
           python -m pip install pytest
           python -m pip install .
-          python -m import peacemakr_core_crypto_python
           ls /Users/runner/hostedtoolcache/Python/3.5.7/x64/lib/python3.5/site-packages
           pwd
           which python
+          python -c "import peacemakr_core_crypto_python as p"
           python -m pytest
 
