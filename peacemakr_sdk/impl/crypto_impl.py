@@ -248,7 +248,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         dst.save(PERSISTER_ASYM_BITLEN, src.load(PERSISTER_ASYM_BITLEN))
 
     def __gen_and_register_new_preferred_client_key(self):
-        temp_in_memory_persister: InMemoryPersister = InMemoryPersister()
+        temp_in_memory_persister = InMemoryPersister()
         public_key = self.__gen_new_asymmetric_keypair(temp_in_memory_persister)
 
         client_api = ClientApi(self.__get_client())
