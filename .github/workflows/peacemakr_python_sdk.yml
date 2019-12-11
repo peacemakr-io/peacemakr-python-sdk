@@ -31,6 +31,3 @@ jobs:
       run: |
         pip install pytest
         pytest
-#     - name: Build docker image
-#       run: |
-#         docker build -t peacemakr-python-sdk  
