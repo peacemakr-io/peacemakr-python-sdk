@@ -44,7 +44,7 @@ jobs:
           ls /Users/runner/hostedtoolcache/Python/3.7.5/x64/lib/python3.7/site-packages
           pwd
           which python3.7
-          ls /usr/local/Cellar/python/3.7.5/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/
+          cp /usr/local/Cellar/python/3.7.5/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/peacemakr_core_crypto_python.cpython-37m-darwin.so  /Users/runner/hostedtoolcache/Python/3.7.5/x64/lib/python3.7/site-packages/
           python -c "import peacemakr_core_crypto_python as p"
           python -m pytest
 
