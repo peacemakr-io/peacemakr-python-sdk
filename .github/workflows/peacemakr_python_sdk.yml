@@ -30,7 +30,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.5, 3.6, 3.7]
+        python-version: [3.7]
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python ${{ matrix.python-version }}
@@ -40,10 +40,11 @@ jobs:
       - name: Test with pytest
         run: |
           python -m pip install pytest
-          python -m pip install .
-          ls /Users/runner/hostedtoolcache/Python/3.5.7/x64/lib/python3.5/site-packages
+          python setup.py install
+          ls /Users/runner/hostedtoolcache/Python/3.7.5/x64/lib/python3.7/site-packages
           pwd
-          which python
+          which python3.7
+          ls /usr/local/Cellar/python/3.7.5/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/
           python -c "import peacemakr_core_crypto_python as p"
           python -m pytest
 
