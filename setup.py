@@ -59,7 +59,7 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
     site_packages = next(p for p in sys.path if 'site-packages' in p)
     git_clone_command = ["git" ,"clone", "https://github.com/peacemakr-io/peacemakr-core-crypto.git"]
     rm_clone_command = ["rm", "-rf", "peacemakr-core-crypto"]
-    install_command = ["cd", "peacemakr-core-crypto/bin", "&&", "./release-python.sh", "local", "/Users/dahuang/.virtualenvs/python-core-crypto/lib/python3.7/site-packages/", "release"]
+    install_command = ["cd", "peacemakr-core-crypto/bin", "&&", "./release-python.sh", "local", site_packages, "release"]
     export_env = ["export", "LD_LIBRARY_PATH=/usr/local/lib"]
     # clone the repo
     self.announce(
