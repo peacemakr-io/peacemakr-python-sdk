@@ -24,4 +24,3 @@ docker run --network='host' \
            -v $(pwd)/output/:/peacemakr/python/output/ \
            python-test
 
-firefox output/*/index.html output/tests/*.html
