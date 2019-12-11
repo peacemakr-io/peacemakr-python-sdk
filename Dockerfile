@@ -14,23 +14,20 @@ RUN wget "https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.
     ./bootstrap && make && make install && \
     cd / && rm -rf cmake-3.16.0 && rm cmake-3.16.0.tar.gz
 
-WORKDIR /peacemakr
+WORKDIR /peacemakr/python
 ADD requirements.txt \
     test-requirements.txt \
     examples/example.py \
     setup.py /peacemakr/python/
 ADD peacemakr_sdk /peacemakr/python/peacemakr_sdk/
-
-WORKDIR /peacemakr/python
 RUN bash && pip install --upgrade pip \
-    && pip install -r requirements.txt \
-    && pip install -r test-requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt \
     && python setup.py install
 
 FROM python:3.7.4-alpine
-COPY --from=builder /peacemakr/python /peacemakr
+COPY --from=builder /peacemakr/python /peacemakr/python
 COPY --from=builder /usr/lib /usr/lib
 COPY --from=builder /usr/local/lib /usr/local/lib
 ENV LD_LIBRARY_PATH=/usr/local/lib
-WORKDIR /peacemakr
+WORKDIR /peacemakr/python
 CMD python example.py
