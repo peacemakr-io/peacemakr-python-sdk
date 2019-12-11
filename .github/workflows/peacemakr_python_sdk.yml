@@ -22,7 +22,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r test-requirements.txt
-        python setup.py install
     - name: Lint with flake8
       run: |
         pip install flake8
@@ -30,6 +29,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        pip install pytest
+        python setup.py install
         echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib' >> ~/.bashrc
         source ~/.bashrc
         pytest
