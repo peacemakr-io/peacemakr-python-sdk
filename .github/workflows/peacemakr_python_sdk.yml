@@ -26,6 +26,7 @@ jobs:
       run: |
         pip install pytest
         which python
+        /usr/local/bin/python3 --version
         python setup.py install
         pytest
 
