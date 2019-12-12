@@ -70,7 +70,7 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
 
     # running release commands
     self.announce(
-        'Installing core-crytpo into %s %s' % (str(site_packages), " ".join(install_command)),
+        'Installing core-crytpo into %s %s' % (str(site_package_dir), " ".join(install_command)),
         level=distutils.log.INFO)
     os.system(" ".join(install_command))
 
