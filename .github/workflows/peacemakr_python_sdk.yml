@@ -29,5 +29,6 @@ jobs:
       run: |
         pip install pytest
         python setup.py install
+        python -v -c "import peacemakr_core_crypto_python"
         pytest
 
