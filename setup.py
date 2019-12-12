@@ -79,11 +79,6 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
         level=distutils.log.INFO)
     subprocess.run(rm_clone_command)
 
-    self.announce(
-        'Removing core-crytpo folder',
-        level=distutils.log.INFO)
-    os.system(" ".join(export_env))
-
 
 class BuildPyCommand(setuptools.command.build_py.build_py):
   """Custom build command."""
