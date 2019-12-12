@@ -10,7 +10,7 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
-        python-version: '3.7'
+        python-version: '3.5'
         architecture: 'x64'
     - name: Install dependencies
       run: |
@@ -27,7 +27,7 @@ jobs:
         pip install pytest
         which python
         which python3
-        /usr/local/bin/python3 --version
-        python setup.py install
+        # /usr/local/bin/python3 --version
+        python3.5 setup.py install
         pytest
 
