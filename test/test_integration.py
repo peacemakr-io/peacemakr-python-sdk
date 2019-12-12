@@ -2,8 +2,6 @@ import pytest
 from peacemakr_sdk.generated.api_client import ApiClient
 from peacemakr_sdk.generated.configuration import Configuration
 from peacemakr_sdk.generated.api.org_api import OrgApi
-from peacemakr_sdk.generated.api.server_management_api import ServerManagementApi
-
 import peacemakr_sdk.factory as Factory
 from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 
@@ -27,6 +25,7 @@ def setup_params():
     configuration = Configuration()
     configuration.api_key['authorization'] = ""
     configuration.host = test_url + "/api/v1"
+
     api_client = ApiClient(configuration=configuration)
 
     org_api = OrgApi(api_client=api_client)
@@ -106,3 +105,4 @@ def test_encrypt_decrypt_string(setup_params):
     # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
     assert(decrypted_text == plain_text.encode())
+
