@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.5]
+        python-version: [3.5, 3.6, 3.7]
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
@@ -28,6 +28,7 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
+        which python
         python setup.py install
         ls /Users/runner/hostedtoolcache/Python/3.5.7/x64/lib/python3.5/site-packages
         pytest
