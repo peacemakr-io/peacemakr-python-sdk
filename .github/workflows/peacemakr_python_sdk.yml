@@ -38,5 +38,5 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run:  ./build-test.sh
       - name: Run Docker compose
-        run: docker-compose up
+        run: docker-compose up --exit-code-from test
 
