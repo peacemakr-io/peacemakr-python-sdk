@@ -23,8 +23,7 @@ services:
       - seccomp:unconfined
     cap_add:
       - SYS_PTRACE
-    # volumes:
-    #   - /private/tmp/peacemakr.io/keyderiver:/keyderiver
+
   redis:
     image: "redis:alpine"
   test:

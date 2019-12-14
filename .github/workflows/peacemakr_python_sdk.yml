@@ -33,5 +33,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run:  ./build-test.sh
       - name: Run Docker compose
+<<<<<<< HEAD
         run: docker-compose up --exit-code-from test
+=======
+        run: docker-compose up
+>>>>>>> add docker-comopse and use pre-built python with cmakessl
 
