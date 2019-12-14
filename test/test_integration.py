@@ -38,13 +38,13 @@ def test_register(setup_api_key):
     print(persister.debug())
 
 
-# def test_sync(setup_api_key):
-#     persister = InMemoryPersister()
-#     sdk = Factory.get_crypto_sdk(api_key=setup_api_key.key, client_name="test register", peacemakr_hostname="http://localhost:8080", persister=persister)
-#     sdk.register()
-#     # sleep for 1 sec to wait for sdk to have at least few keys ready
-#     # we should check for raise exception
-#     time.sleep(1)
-#     sdk.sync()
+def test_sync(setup_api_key):
+    persister = InMemoryPersister()
+    sdk = Factory.get_crypto_sdk(api_key=setup_api_key.key, client_name="test register", peacemakr_hostname="http://peacemakr-services:80", persister=persister)
+    sdk.register()
+    # sleep for 1 sec to wait for sdk to have at least few keys ready
+    # we should check for raise exception
+    time.sleep(1)
+    sdk.sync()
 
     
