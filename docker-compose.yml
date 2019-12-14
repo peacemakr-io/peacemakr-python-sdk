@@ -1,0 +1,37 @@
+version: '3'
+services:
+  peacemakr-services:
+    image: 716293438869.dkr.ecr.us-east-2.amazonaws.com/peacemakr-services:latest
+    depends_on:
+      - redis
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      - PEACEMAKR_REDIS_URL=redis:6379
+  keyderiver-cloud:
+    image: 716293438869.dkr.ecr.us-east-2.amazonaws.com/key-derivation-service:latest
+    environment:
+      - PEACEMAKR_KEYDERIVER_PEACEMAKR_BOOTSTRAPPRIVATEKEYLOCATION=/keys/bootstrap
+      - PEACEMAKR_KEYDERIVER_PEACEMAKR_HOST=peacemakr-services
+    depends_on:
+      - peacemakr-services
+    links:
+      - peacemakr-services
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - /private/tmp/peacemakr.io/keyderiver:/keyderiver
+  redis:
+    image: "redis:alpine"
+  test:
+    image: peacemakr-python-sdk-test
+    depends_on:
+      - peacemakr-services
+      - keyderiver-cloud
+    links:
+      - peacemakr-services
+      - keyderiver-cloud
