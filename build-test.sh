@@ -16,7 +16,7 @@ docker pull 716293438869.dkr.ecr.us-east-2.amazonaws.com/key-derivation-service:
 docker pull danielhuang37/peacemakr-pycmakessl:latest || true
 =======
 
-docker build -t peacemakr-python-sdk-test -f TestDockerfile --network=host .
+# docker build -t peacemakr-python-sdk-test -f TestDockerfile --network=host .
 # test_volume_exists=$(docker volume ls | grep python-test-volume)
 # if [ -z "$test_volume_exists" ]; then
 #   docker volume create python-test-volume
