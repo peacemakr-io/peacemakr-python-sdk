@@ -22,6 +22,14 @@ jobs:
         pip install flake8
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+<<<<<<< HEAD
+=======
+    # - name: Test with pytest
+    #   run: |
+    #     pip install pytest
+    #     python3 setup.py install
+    #     pytest
+>>>>>>> test aws key
   test:
     runs-on: ubuntu-latest
     steps:
@@ -32,6 +40,10 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run:  ./build-test.sh
+<<<<<<< HEAD
       - name: Run Docker compose
         run: docker-compose up --exit-code-from test
+=======
+
+>>>>>>> test aws key
 
