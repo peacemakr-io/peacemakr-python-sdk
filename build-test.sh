@@ -3,7 +3,7 @@
 set -ex
 
 # Setup credentials
-$(aws ecr get-login --no-include-email --region us-east-2 --profile peacemakr) || true
+$(aws ecr get-login --no-include-email --region us-east-2) || true
 
 # Pull the latest
 docker pull 716293438869.dkr.ecr.us-east-2.amazonaws.com/peacemakr-services:latest || true
