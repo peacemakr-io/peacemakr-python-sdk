@@ -88,7 +88,6 @@ def test_encrypt_decrypt_string(setup_params):
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_encrypt_decrypt_string", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
 
-
     # sleep to wait for keys to be generated in server
     time.sleep(2)
     sdk.sync()
