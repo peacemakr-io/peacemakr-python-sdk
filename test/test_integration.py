@@ -42,7 +42,6 @@ def setup_params():
     return params
 
 
-
 def test_register(setup_params):
     persister = InMemoryPersister()
 
