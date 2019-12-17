@@ -47,4 +47,20 @@ def test_sync(setup_api_key):
     time.sleep(1)
     sdk.sync()
 
-    
+
+def test_encrypt(setup_api_key):
+    persister = InMemoryPersister()
+    sdk = Factory.get_crypto_sdk(api_key=setup_api_key.key, client_name="test register", peacemakr_hostname="http://peacemakr-services:80", persister=persister)
+    sdk.register()
+
+    time.sleep(3)
+    sdk.sync()
+
+    plain_text = b'encrypted text'
+    encrypted_text = sdk.encrypt(plain_text)
+
+    assert(plain_text != encrypted_text)
+
+    decrypted_text = sdk.decrypt(encrypted_text)
+
+    assert(decrypted_text == plain_text)
