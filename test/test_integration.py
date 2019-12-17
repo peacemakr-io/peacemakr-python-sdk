@@ -13,7 +13,7 @@ import time
 def setup_api_key():
     # set up test api_key
     # set up test address
-    time.sleep(2)
+    time.sleep(5)
     configuration = Configuration()
     configuration.api_key['authorization'] = ""
     configuration.host = "http://peacemakr-services:80" + "/api/v1"
@@ -31,7 +31,7 @@ def setup_api_key():
 
 
 def test_register(setup_api_key):
-
+    time.sleep(2)
     persister = InMemoryPersister()
     sdk = Factory.get_crypto_sdk(api_key=setup_api_key.key, client_name="test register", peacemakr_hostname="http://peacemakr-services:80", persister=persister)
     sdk.register()
