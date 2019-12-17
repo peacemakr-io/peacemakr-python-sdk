@@ -104,3 +104,4 @@ def test_encrypt_decrypt_string(setup_params):
     # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
     assert(decrypted_text == plain_text.encode())
+
