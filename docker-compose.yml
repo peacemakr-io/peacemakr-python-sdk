@@ -23,7 +23,6 @@ services:
       - seccomp:unconfined
     cap_add:
       - SYS_PTRACE
-
   redis:
     image: "redis:alpine"
   test:
