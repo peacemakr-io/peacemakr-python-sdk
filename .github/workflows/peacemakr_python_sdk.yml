@@ -1,4 +1,4 @@
-name: peacemakr_python_sdk
+name: Build & Test
 
 on: [push]
 

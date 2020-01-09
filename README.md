@@ -1,6 +1,12 @@
+<p align="center">
+  <br>
+    <img src="https://github.com/peacemakr-io/peacemakr-admin-portal/blob/master/peacemakr-admin/public/images/PeacemakrP-Golden.png" width="150"/>
+  <br>
+</p>
+
 # Peacemakr Python Library
 
-![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/peacemakr_python_sdk/badge.svg)
+![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/Build+%26+Test/badge.svg)
 
 Peacemakr's Python Crypto SDK for application layer crypto, and, key lifecycle management.
 
