@@ -29,6 +29,8 @@ services:
     image: "redis:alpine"
   test:
     image: peacemakr-python-sdk-test
+    environment:
+      - PEACEMAKR_TEST_URL=http://peacemakr-services:80
     depends_on:
       - peacemakr-services
       - keyderiver-cloud

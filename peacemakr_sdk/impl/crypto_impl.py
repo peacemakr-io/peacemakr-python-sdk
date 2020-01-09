@@ -576,5 +576,4 @@ class CryptoImpl(PeacemakrCryptoSDK):
         plain_text, need_verification = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
         if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
             raise CoreCryptoError('Verification Failed')
-
-        return plain_text.data.encode(encoding='UTF-8')
+        return plain_text.data
