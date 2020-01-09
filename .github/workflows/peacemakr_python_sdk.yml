@@ -1,4 +1,4 @@
-name: Peacemakr Python SDK
+name: peacemakr_python_sdk
 
 on: [push]
 

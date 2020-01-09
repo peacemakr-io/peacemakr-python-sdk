@@ -1,6 +1,6 @@
 # Peacemakr Python Library
 
-![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/.github/workflows/peacemakr_python_sdk.yml/badge.svg)
+![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/peacemakr_python_sdk/badge.svg)
 
 Peacemakr's Python Crypto SDK for application layer crypto, and, key lifecycle management.
 
