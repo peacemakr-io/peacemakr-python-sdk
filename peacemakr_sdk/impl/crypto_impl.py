@@ -580,6 +580,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise CoreCryptoError('Verification Failed')
 
         result = plain_text.data
-
         assert isinstance(result, bytes)
+
         return result
