@@ -139,7 +139,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
         except ApiException as e:
             raise ServerError(e)
-        print(self.crypto_config)
+
 
 
     def __get_client(self) -> ApiClient:
