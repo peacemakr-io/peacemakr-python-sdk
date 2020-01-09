@@ -583,3 +583,4 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         assert isinstance(result, bytes)
         return result
+
