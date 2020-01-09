@@ -16,6 +16,7 @@ We take security and trust very seriously. If you believe you have found a secur
 
 See the [API docs](https://github.com/peacemakr-io/peacemakr-python-sdk/tree/docs/docs)
 
+
 ## Installation
 Install from source
 ```sh
@@ -37,7 +38,6 @@ Set the API key and initialize the persister to start using the SDK.
 ```python
 import peacemakr_sdk.factory as factory
 
-
 api_key = "api-key"
 persister = InMemoryPersister()
 sdk = factory.get_crypto_sdk(api_key=api_key,
@@ -55,7 +55,6 @@ It's straightforward to encrypt and decrypt anything with peacmekar library
 import peacemakr_sdk.factory as factory
 import os
 import b64encode
-
 
 sdk = factory.get_crypto_sdk(api_key=..., client_name=..., peacemakr_hostname=..., persister=...)
 random_bytes = b64encode(os.urandom(100))
