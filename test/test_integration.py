@@ -42,7 +42,7 @@ def setup_params():
 
 def test_register(setup_params):
     persister = InMemoryPersister()
-    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test register", peacemakr_hostname=setup_params["test_url"], persister=persister)
+    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_register", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
 
     num_clients = persister.key_nums()
@@ -50,7 +50,7 @@ def test_register(setup_params):
 
 def test_sync(setup_params):
     persister = InMemoryPersister()
-    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test register", peacemakr_hostname=setup_params["test_url"], persister=persister)
+    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_sync", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
 
     # sleep for 1 sec to wait for sdk to have at least few keys ready
@@ -63,7 +63,7 @@ def test_sync(setup_params):
 
 def test_encrypt_decrypt_bytes(setup_params):
     persister = InMemoryPersister()
-    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test register", peacemakr_hostname=setup_params["test_url"], persister=persister)
+    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_encrypt_decrypt_bytes", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
 
     # sleep to wait for keys to be generated in server
@@ -87,7 +87,7 @@ def test_encrypt_decrypt_bytes(setup_params):
 
 def test_encrypt_decrypt_string(setup_params):
     persister = InMemoryPersister()
-    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test register", peacemakr_hostname=setup_params["test_url"], persister=persister)
+    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_encrypt_decrypt_string", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
 
     # sleep to wait for keys to be generated in server
