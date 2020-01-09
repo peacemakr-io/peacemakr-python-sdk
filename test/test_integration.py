@@ -28,8 +28,6 @@ def setup_params():
 
     api_client = ApiClient(configuration=configuration)
 
-    client_api = ServerManagementApi(api_client)
-    print(client_api.health_get())
     org_api = OrgApi(api_client=api_client)
     api_key = None
     api_key = org_api.get_test_organization_api_key()
@@ -46,6 +44,7 @@ def test_register(setup_params):
     persister = InMemoryPersister()
 
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_register", peacemakr_hostname=setup_params["test_url"], persister=persister)
+
     sdk.register()
 
     num_clients = persister.key_nums()
@@ -54,6 +53,7 @@ def test_register(setup_params):
 def test_sync(setup_params):
     persister = InMemoryPersister()
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_sync", peacemakr_hostname=setup_params["test_url"], persister=persister)
+
     sdk.register()
 
     # sleep for 1 sec to wait for sdk to have at least few keys ready
@@ -67,6 +67,7 @@ def test_sync(setup_params):
 def test_encrypt_decrypt_bytes(setup_params):
     persister = InMemoryPersister()
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_encrypt_decrypt_bytes", peacemakr_hostname=setup_params["test_url"], persister=persister)
+
     sdk.register()
 
     # sleep to wait for keys to be generated in server
