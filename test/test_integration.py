@@ -81,9 +81,9 @@ def test_encrypt_decrypt_bytes(setup_params):
     encrypted_text = sdk.encrypt(plain_text)
     assert(plain_text != encrypted_text)
 
-    # ouptut is string
+    # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
-    assert(decrypted_text.encode() == plain_text)
+    assert(decrypted_text == plain_text)
 
 def test_encrypt_decrypt_string(setup_params):
     persister = InMemoryPersister()
@@ -103,6 +103,6 @@ def test_encrypt_decrypt_string(setup_params):
     encrypted_text = sdk.encrypt(plain_text.encode())
     assert(plain_text != encrypted_text)
 
-    # ouptut is string
+    # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
-    assert(decrypted_text == plain_text)
+    assert(decrypted_text == plain_text.encode())
