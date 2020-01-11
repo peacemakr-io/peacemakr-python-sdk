@@ -62,7 +62,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         assert isinstance(api_key, str)
         assert isinstance(client_name, str)
         assert isinstance(peacemakr_hostname, str)
-        assert logger is None or isinstance(logger, Logger)
+        assert logger is None or isinstance(logger, logging.Logger)
         if not client_name:
             raise MissingClientNameError("A client name is required")
         if not api_key:
@@ -77,7 +77,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.org = None
         self.crypto_config = None
         self.persister = persister
-        self.logger = logger
+
+        self.logger = logger if logger != None else logging.getLogger("default_logger")
 
         self.__client = None
         self.__api_client = None
@@ -117,6 +118,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __do_bootstrap_org_and_crypto_config(self):
         # set up org, api_client, and crypto_config
         if self.__is_bootstrapped():
+            self.logger.info("client is bootstrapped already")
             return
 
         api_client = self.__get_client()
@@ -130,6 +132,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             self.org = org_api.get_organization_from_api_key(apikey=self.api_key)
         except ApiException as e:
+            self.logger.warning("Excpetion in getting organization from api key: {}".format(e))
             raise ServerError(e)
 
     def __load_crypto_config(self, api_client: ApiClient):
@@ -138,6 +141,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
         except ApiException as e:
+            self.logger.warning("Exception in getting crypto config: {}".format(e))
             raise ServerError(e)
 
 
@@ -147,6 +151,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return self.__api_client
 
         if self.api_key == "":
+            self.logger.warning("Missing API Key")
             raise MissingAPIKeyError("Missing API Key")
 
         configuration = Configuration()
@@ -171,7 +176,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         created_time = int(round(time.time()))
         if created_time > sys.maxsize:
-            raise UnrecoverableClockSkewDetectedError('Failed to detect a valid time for local asymmetric key creation time.')
+            self.logger.error("Failed to detect a valid time for local asymmetric key creation time")
+            raise UnrecoverableClockSkewDetectedError("Failed to detect a valid time for local asymmetric key creation time")
 
         pub_key = PublicKey(id="",
                             key=pub_pem,
@@ -206,8 +212,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
         asymm_key = '{}{}'.format(prefix, bit_length)
 
         if asymm_key not in asymm_dict:
-            logging.warning('{} is not currently supported by Peacemakr. Going to default ECDH_P521'.format(asymm_key))
+            self.logger.warning('{} is not currently supported by Peacemakr. Going to default ECDH_P521'.format(asymm_key))
             return p.AsymmetricCipher.ECDH_P521
+
         return asymm_dict[asymm_key]
 
     def __get_symmetric_cipher(self, symmetric_alg: str) -> p.SymmetricCipher:
@@ -219,8 +226,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
             "AES-256-GCM": p.SymmetricCipher.AES_256_GCM,
         }
         if symmetric_alg not in select_cipher:
-            logging.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(symmetric_alg, DEFAULT_SYMM_CIPHER))
+            self.logger.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(symmetric_alg, DEFAULT_SYMM_CIPHER))
             return DEFAULT_SYMM_CIPHER
+
         return select_cipher[symmetric_alg]
 
     def __get_digest_alg(self, digest_algorithm: str) -> p.DigestAlgorithm:
@@ -232,8 +240,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
             "SHA_512" : p.DigestAlgorithm.SHA_512,
         }
         if digest_algorithm not in select_digest:
-            logging.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(digest_algorithm, DEFAULT_MESSAGE_DIGEST))
+            self.logger.warning('{} is not currently supported by Peacemakr. Going to default {}'.format(digest_algorithm, DEFAULT_MESSAGE_DIGEST))
             return DEFAULT_MESSAGE_DIGEST
+
         return select_digest[digest_algorithm]
 
     def __verify_bootstrapped_and_registered(self):
@@ -242,7 +251,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __save_new_asymmetric_key_pair(self, src: Persister, dst: Persister):
         assert isinstance(src, Persister)
-        assert isinstance(to, Persister)
+        assert isinstance(dst, Persister)
         dst.save(PERSISTER_PRIV_KEY, src.load(PERSISTER_PRIV_KEY))
         dst.save(PERSISTER_PUB_KEY, src.load(PERSISTER_PUB_KEY))
         dst.save(PERSISTER_ASYM_TYPE, src.load(PERSISTER_ASYM_TYPE))
@@ -257,6 +266,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             public_key = client_api.add_client_public_key(self.__client.id, public_key)
         except ApiException as e:
+            self.logger.warning("Exception in adding client public key: {}".format(e))
             raise ServerError(e)
 
         self.__save_new_asymmetric_key_pair(temp_in_memory_persister, self.persister)
@@ -267,7 +277,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         assert isinstance(new_config, p.CryptoConfig)
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
         if not new_config.client_key_type == cur_asymmetric_key_type:
-            #FIXME: add logger
+            self.logger.info("update client asymmetric key type and crypto config")
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
             return
@@ -275,7 +285,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         cur_asymmetric_key_creation_time = self.persister.load(PERSISTER_ASYM_CREATED_DATE_EPOCH)
         asymmetric_key_creation_time = cur_asymmetric_key_creation_time
         if (new_config.client_key_ttl + asymmetric_key_creation_time) > int(round(time.time())):
-            #FFIXME: add logger
+            self.logger.info("client key expired, generating new client key")
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
             return
@@ -283,7 +293,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         cur_asymmetric_key_bit_lens = self.persister.load(PERSISTER_ASYM_BITLEN)
         asymmertric_key_bit_len = int(cur_asymmetric_key_bit_lens)
         if asymmertric_key_bit_len != new_config.client_key_bitlength:
-            #FIXME: add logger
+            self.logger.info("update client key length and crypto config")
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
             return
@@ -296,11 +306,12 @@ class CryptoImpl(PeacemakrCryptoSDK):
         '''
         key_api = KeyServiceApi(api_client=self.__get_client())
         try:
-            all_keys = key_api.get_all_encrypted_keys(self.__client.preferred_public_key_id, symmetric_key_ids=required_keys)
-
-            self.__decrypt_and_save(all_keys)
+            all_keys = key_api.get_all_encrypted_keys(self.__client.preferred_public_key_id, symmetric_key_ids=required_keys)            
         except ApiException as e:
+            self.logger.warning("Exception in getting all encrypted keys: {}".format(e))
             raise ServerError(e)
+
+        self.__decrypt_and_save(all_keys)
 
 
 
@@ -310,7 +321,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         '''
         # loaded private preferred key should be loaded at boostrap
         if self.__loaded_private_preferred_key == None:
-            raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
+            raise PeacemakrError("SDK was not registered, please register before using other SDK operations")
 
         for key in all_keys:
             if key == None:
@@ -319,8 +330,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
             raw_cipher_text_str = key.packaged_ciphertext
             if raw_cipher_text_str == None:
-                # add logger
-                print('Failed to get raw ciphertext str from EncryptedSymmetricKey')
+                self.logger.info("Failed to get raw ciphertext str from EncryptedSymmetricKey")
                 continue
 
             # deserialized[0] is a pycapsule object that decrypt takes in,
@@ -389,6 +399,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             pub_key = key_service_api.get_public_key(key_id)
         except ApiException as e:
+            self.logger.warning("Exception in getting public key: {}".format(e))
             raise ServerError(e)
 
         self.persister.save(key_id, pub_key.key)
@@ -416,6 +427,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         try:
             new_client = client_api.add_client(client)
         except ApiException as e:
+            self.logger.warning("Exception in getting all adding client: {}".format(e))
             raise ServerError(e)
 
         self.__client = new_client
@@ -436,6 +448,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             if new_config != self.crypto_config:
                 self.__update_local_crypto_config(new_config)
         except ApiException as e:
+            self.logger.warning("Exception in getting crypto config: {}".format(e))
             raise ServerError(e)
 
         self.__download_and_save_all_keys()
@@ -490,7 +503,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
             return None
 
         if self.__loaded_private_preferred_key == None:
-            raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
+            self.logger.warning("SDK was not registered, please register before using other SDK operations")
+            raise PeacemakrError("SDK was not registered, please register before using other SDK operations")
 
         return self.__loaded_private_preferred_key
 
@@ -529,7 +543,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
 
         if not self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text):
-            logging.warning('Signing failed. Verification not required when decrypting.')
+            self.logger.warning('Signing failed. Verification not required when decrypting.')
 
         return self.__crypto_context.serialize(digest, cipher_text).encode(encoding='UTF-8')
 
@@ -571,13 +585,15 @@ class CryptoImpl(PeacemakrCryptoSDK):
         aad = self.__crypto_context.extract_unverified_aad(cipher_text).aad
         aad = self.__parse_cipher_text_AAD(aad)
         if not self.__is_key_id_decryption_viable(aad.cryptoKeyID):
-            raise NoValidUseDomainsForDecryptionError('Ciphertext is no longer viable for decryption')
+            self.logger.warning("Ciphertext is no longer viable for decryption")
+            raise NoValidUseDomainsForDecryptionError("Ciphertext is no longer viable for decryption")
 
         key = self.__get_key(aad.cryptoKeyID)
         pmKey = p.Key(p.SymmetricCipher(cfg.symm_cipher), key)
         plain_text, need_verification = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
         if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
-            raise CoreCryptoError('Verification Failed')
+            self.logger.warning("Verification Failed")
+            raise CoreCryptoError("Verification Failed")
 
         result = plain_text.data
 

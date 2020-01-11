@@ -1,4 +1,5 @@
 from peacemakr_sdk.persister_base import Persister
+import logging
 
 class InMemoryPersister(Persister):
 
@@ -16,7 +17,7 @@ class InMemoryPersister(Persister):
 
     def debug(self):
         for key in self.__persister:
-            print(key, "->", self.__persister[key])
+            logging.debug(key, "->", self.__persister[key])
 
     def key_nums(self):
         return len(self.__persister.keys())
