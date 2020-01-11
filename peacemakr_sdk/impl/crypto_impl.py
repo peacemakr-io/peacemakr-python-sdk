@@ -521,7 +521,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # FIXME persister preferred keyid can cause delay if persister read from disk
         aad = CiphertextAAD(encryption_key_id_for_encryption, self.persister.load(PERSISTER_PREFERRED_KEYID))
         json_bytes = bytes(json.dumps(aad.__dict__), encoding='utf8')
-        pm_plain_text = p.Plaintext(plain_text, json_bytes)
+
+        base64_plain_text = base64.b64encode(plain_text)
+        pm_plain_text = p.Plaintext(base64_plain_text, json_bytes)
         random_device = p.RandomDevice()
 
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
@@ -577,7 +579,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
             raise CoreCryptoError('Verification Failed')
 
-        result = plain_text.data.encode()
+        result = base64.decodebytes(plain_text.data.encode())
 
         assert isinstance(result, bytes)
         return result

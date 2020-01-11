@@ -76,7 +76,7 @@ def test_encrypt_decrypt_bytes(setup_params):
     # generate random bytes
     random_bytes = os.urandom(100)
     # encode random bytes to utf-8
-    plain_text = b64encode(random_bytes)
+    plain_text = random_bytes
 
     encrypted_text = sdk.encrypt(plain_text)
     assert(plain_text != encrypted_text)
