@@ -78,7 +78,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.crypto_config = None
         self.persister = persister
 
-        self.logger = logger if logger != None else logging.getLogger("default_logger")
+        self.logger = logger or logging.getLogger("default_logger")
 
         self.__client = None
         self.__api_client = None
@@ -112,6 +112,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         now = time.time()
         if (now - self.__last_updated_time) > max_elasped_time:
             # add logger
+            self.logger.info("Process elasped more than {} secs, updating config".format(max_elasped_time))
             self.sync()
             self.__last_updated_time = time.time()
 
@@ -247,7 +248,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __verify_bootstrapped_and_registered(self):
         if not self.__is_registered() or not self.__is_bootstrapped():
-            raise PeacemakrError("SDK was not registered, please register before using other SDK operations.")
+            self.logger.warning("SDK was not registered, please register before using other SDK operations")
+            raise PeacemakrError("SDK was not registered, please register before using other SDK operations")
 
     def __save_new_asymmetric_key_pair(self, src: Persister, dst: Persister):
         assert isinstance(src, Persister)
@@ -316,16 +318,16 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __decrypt_and_save(self, all_keys: list):
-        assert isinstance(all_keys, list)
         ''' decryptes the encrypted symmetric keys and save them to persister
         '''
+        assert isinstance(all_keys, list)
         # loaded private preferred key should be loaded at boostrap
         if self.__loaded_private_preferred_key == None:
+            self.logger.warning("SDK was not registered, please register before using other SDK operations")
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations")
 
         for key in all_keys:
             if key == None:
-                # add logger
                 continue
 
             raw_cipher_text_str = key.packaged_ciphertext
@@ -340,7 +342,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
             extracted_aad = self.__crypto_context.extract_unverified_aad(raw_cipher_text_str)
             # check if extracted aad is null
             if extracted_aad == "" or not extracted_aad:
-                raise CoreCryptoError('Failed to extract aad from the ciphertext.')
+                self.logger.warning("Failed to extrat aad from the ciphertext")
+                raise CoreCryptoError("Failed to extract aad from the ciphertext")
 
             aad = json.loads(extracted_aad.aad)
 
@@ -356,6 +359,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             elif self.__is_rsa(self.__loaded_private_preferred_cipher):
                 result = self.__crypto_context.decrypt(self.__loaded_private_preferred_key, deserialized[0])
             else:
+                self.logger.warning("This version of python SDK only support ec or rsa. Invalid cipher.")
                 raise InvalidCipherError("This version of python SDK only support ec or rsa. Invalid cipher.")
 
             # data is the plaintext, result = [plainText, NeedVerify:bool]; plainText = {data, aad}
@@ -409,10 +413,15 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def register(self):
         # check is register and is boostrap, if not initialize
+        print("HUEHUEHUEHUE")
+        self.logger.info("HUEHUE INFO")
+        self.logger.debug("HUEHUE DEBUG")
+        self.logger.warning("HUEHUE WARNING")
+        self.logger.exception("HUEHUE EXCEPTION")
         if self.__is_registered():
             if not self.__is_bootstrapped():
                 self.__do_bootstrap_org_and_crypto_config()
-            # add logger
+            self.logger.info("User is registered and boostrapped already")
             return
 
         self.__do_bootstrap_org_and_crypto_config()
