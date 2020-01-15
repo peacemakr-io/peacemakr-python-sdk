@@ -358,7 +358,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
             keys_in_str = result[0].data
 
             key_len = key.key_length
-            keys_in_bytes = base64.decodebytes(keys_in_str.encode())
+            keys_in_bytes = base64.decodebytes(keys_in_str)
             for i in range(len(key.key_ids)):
                 # loop thru each key id and save their respective keys
                 key_in_bytes = keys_in_bytes[i*key_len:(i+1)*key_len]
@@ -522,8 +522,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         aad = CiphertextAAD(encryption_key_id_for_encryption, self.persister.load(PERSISTER_PREFERRED_KEYID))
         json_bytes = bytes(json.dumps(aad.__dict__), encoding='utf8')
 
-        base64_plain_text = base64.b64encode(plain_text)
-        pm_plain_text = p.Plaintext(base64_plain_text, json_bytes)
+        pm_plain_text = p.Plaintext(plain_text, json_bytes)
         random_device = p.RandomDevice()
 
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
@@ -534,8 +533,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return self.__crypto_context.serialize(digest, cipher_text).encode(encoding='UTF-8')
 
 
-    def __parse_cipher_text_AAD(self, aad: str) -> CiphertextAAD:
-        assert isinstance(aad, str)
+    def __parse_cipher_text_AAD(self, aad: bytes) -> CiphertextAAD:
+        assert isinstance(aad, bytes)
         j = json.loads(aad)
         return CiphertextAAD(**j)
 
@@ -579,7 +578,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
             raise CoreCryptoError('Verification Failed')
 
-        result = base64.decodebytes(plain_text.data.encode())
+        result = plain_text.data
 
         assert isinstance(result, bytes)
         return result
