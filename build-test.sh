@@ -3,7 +3,6 @@
 set -ex
 
 # Setup credentials
-
 $(aws ecr get-login --no-include-email --region us-east-2) || true
 
 # Pull the latest
