@@ -78,7 +78,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.crypto_config = None
         self.persister = persister
         self.logger = logger or logging.getLogger("default_logger")
-
+        logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self.__client = None
         self.__api_client = None
         self.__authentication = None
