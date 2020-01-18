@@ -413,11 +413,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def register(self):
         # check is register and is boostrap, if not initialize
-        print("HUEHUEHUEHUE")
-        self.logger.info("HUEHUE INFO")
-        self.logger.debug("HUEHUE DEBUG")
-        self.logger.warning("HUEHUE WARNING")
-        self.logger.exception("HUEHUE EXCEPTION")
         if self.__is_registered():
             if not self.__is_bootstrapped():
                 self.__do_bootstrap_org_and_crypto_config()

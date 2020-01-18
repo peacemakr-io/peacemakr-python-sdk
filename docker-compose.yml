@@ -15,10 +15,6 @@ services:
       - peacemakr-services
     links:
       - peacemakr-services
-    security_opt:
-      - seccomp:unconfined
-    cap_add:
-      - SYS_PTRACE
   redis:
     image: "redis:alpine"
   test:

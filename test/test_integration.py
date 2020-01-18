@@ -38,8 +38,7 @@ def setup_params():
     return params
 
 
-def test_register(setup_api_key):
-    time.sleep(2)
+def test_register(setup_params):
     persister = InMemoryPersister()
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"], client_name="test_register", peacemakr_hostname=setup_params["test_url"], persister=persister)
     sdk.register()
