@@ -139,7 +139,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
         except ApiException as e:
             raise ServerError(e)
-        print(self.crypto_config)
 
 
     def __get_client(self) -> ApiClient:
@@ -580,6 +579,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
             raise CoreCryptoError('Verification Failed')
 
         result = plain_text.data
-        assert isinstance(result, bytes)
 
+        assert isinstance(result, bytes)
         return result

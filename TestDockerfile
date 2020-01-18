@@ -1,6 +1,5 @@
 FROM danielhuang37/peacemakr-pycmakessl:latest as builder
 
-
 WORKDIR /peacemakr/python
 ADD requirements.txt \
     examples/example.py \

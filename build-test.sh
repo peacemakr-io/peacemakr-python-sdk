@@ -11,5 +11,3 @@ docker pull 716293438869.dkr.ecr.us-east-2.amazonaws.com/key-derivation-service:
 docker pull danielhuang37/peacemakr-pycmakessl:latest || true
 
 docker build -t peacemakr-python-sdk-test -f TestDockerfile --network=host .
-
-
