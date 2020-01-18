@@ -35,11 +35,11 @@ The library requires your API key from the dashboard which is available at https
 
 Set the API key and initialize the persister to start using the SDK.
 ```python
+import peacemakr_sdk as p
 import peacemakr_sdk.factory as factory
 
-
 api_key = "api-key"
-persister = InMemoryPersister()
+persister = p.InMemoryPersister()
 sdk = factory.get_crypto_sdk(api_key=api_key,
                                 client_name="hello world",
                                 peacemakr_hostname="https://api.peacemakr.io",
