@@ -1,10 +1,10 @@
 import peacemakr_sdk
-from peacemakr_sdk.factory import Factory
+import peacemakr_sdk.factory as Factory
 
 
 def main():
     api_key = "api-key"
-    sdk = Factory().get_crypto_sdk()
+    sdk = Factory.get_crypto_sdk()
     
     sdk.register()
     sdk.sync()
