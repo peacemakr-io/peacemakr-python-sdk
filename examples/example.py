@@ -9,7 +9,6 @@ from peacemakr_sdk.impl.persister_impl import InMemoryPersister
 import peacemakr_sdk.factory as Factory
 
 def example(configuration: dict):
-  global os
   # Simply call get_crypto_sdk() with the according
   # parameters to obtain you SDK object
   sdk = Factory.get_crypto_sdk(**configuration)
