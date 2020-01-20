@@ -56,19 +56,14 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
     """Run command."""
     site_package_dir = next(p for p in sys.path if 'site-packages' in p)
     git_clone_command = ["git" ,"clone", "https://github.com/peacemakr-io/peacemakr-core-crypto.git"]
-    # checkout_tag = ["git", "checkout", "tags/v0.1.0"]
     rm_clone_command = ["rm", "-rf", "peacemakr-core-crypto"]
-    install_command = ["cd", "peacemakr-core-crypto/bin", "&&", "./release-python.sh", "local", "none", "release"]
+    install_command = ["cd", "peacemakr-core-crypto/bin", "&&", "./release-python.sh", "local", site_package_dir, "release"]
     export_env = ["export", "LD_LIBRARY_PATH=/usr/local/lib"]
     # clone the repo
     self.announce(
         'Cloning core-crypto @: %s' % ("https://github.com/peacemakr-io/peacemakr-core-crypto.git"),
         level=distutils.log.INFO)
     subprocess.run(git_clone_command)
-
-    # # checkout v0.1.0 tag
-    # self.announce("checking out tag{}".format("v0.1.0"))
-    # subprocess.run(checkout_tag)
 
     # check openssl and cmake
 
@@ -102,7 +97,7 @@ setup(
     description="Peacemakr",
     author_email="",
     url="",
-    keywords=["Peacemakr", "Security", "Cryptography", "SDK"],
+    keywords=["Peacemakr"],
     install_requires=REQUIRES,
     packages=find_packages(),
     include_package_data=True,
