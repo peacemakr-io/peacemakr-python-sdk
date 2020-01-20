@@ -4,6 +4,10 @@ services:
     image: 716293438869.dkr.ecr.us-east-2.amazonaws.com/peacemakr-services:latest
     depends_on:
       - redis
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
     environment:
       - PEACEMAKR_REDIS_URL=redis:6379
   keyderiver-cloud:
@@ -15,6 +19,10 @@ services:
       - peacemakr-services
     links:
       - peacemakr-services
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
   redis:
     image: "redis:alpine"
   test:
