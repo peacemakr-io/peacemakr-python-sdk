@@ -14,9 +14,5 @@ class InMemoryPersister(Persister):
     def exists(self, key):
         return key in self.__persister.keys()
 
-    def debug(self):
-        for key in self.__persister:
-            print(key, "->", self.__persister[key])
-
     def key_nums(self):
         return len(self.__persister.keys())
