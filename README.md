@@ -28,7 +28,7 @@ pip install --upgrade peacemakr_sdk
 ```
 
 ### Requirements
-Python 3.4+
+Python 3.6+
 
 ## Usage
 The library requires your API key from the dashboard which is available at https://admin.peacemakr.io/.
