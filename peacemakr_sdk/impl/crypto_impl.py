@@ -277,8 +277,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __update_local_crypto_config(self, new_config: p.CryptoConfig):
         assert isinstance(new_config, p.CryptoConfig)
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
-        if not new_config.client_key_type == cur_asymmetric_key_type:
-            self.logger.info("update client asymmetric key type and crypto config")
+        if cur_asymmetric_key_type != new_config.client_key_type:
+            self.logger.info("update client asymmetric key type and crypto config from {} to {}".format(cur_asymmetric_key_type, new_config.client_key_type))
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
             return
@@ -294,7 +294,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         cur_asymmetric_key_bit_lens = self.persister.load(PERSISTER_ASYM_BITLEN)
         asymmertric_key_bit_len = int(cur_asymmetric_key_bit_lens)
         if asymmertric_key_bit_len != new_config.client_key_bitlength:
-            self.logger.info("update client key length and crypto config")
+            self.logger.info("update client key length and crypto config from {} to {}".format(asymmertric_key_bit_len, new_config.client_key_bitlength))
             self.crypto_config = new_config
             self.__gen_and_register_new_preferred_client_key()
             return
@@ -595,8 +595,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         pmKey = p.Key(p.SymmetricCipher(cfg.symm_cipher), key)
         plain_text, need_verification = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
         if need_verification and not self.__verify_message(aad, cfg, cipher_text_blob, plain_text):
-            self.logger.warning("Verification Failed")
-            raise CoreCryptoError("Verification Failed")
+            self.logger.warning("Tampering of data detected, verification failed.")
+            raise CoreCryptoError("Tampering of data detected, verification failed.")
 
         result = plain_text.data
 
