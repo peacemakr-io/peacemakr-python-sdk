@@ -48,9 +48,9 @@ if __name__ == "__main__":
           if not specified.
   '''
   configuration = {
-    'api_key': 'E9qCEmgOAR/009W7OSIYsr67VwIYbGuGy++7mZ4/56U=',
+    'api_key': '',
     'client_name': 'example_client',
-    'peacemakr_hostname': 'http://localhost:8080',
+    'peacemakr_hostname': '',
     'persister': InMemoryPersister(),
     'logger': None
   }
