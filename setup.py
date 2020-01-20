@@ -21,7 +21,7 @@ import sys
 import os
 
 NAME = "peacemakr-sdk"
-VERSION = "0.0.1"
+VERSION = "0.0.1.dev.0"
 # To install the library, run the following
 #
 # python setup.py install
