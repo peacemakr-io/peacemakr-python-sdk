@@ -57,41 +57,44 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
   def _execute_command(self, command):
       subprocess.run(command)
 
-  def _get_core_crypto_link(self):
-      # TODO: Detect different python version
-      os_type = sys.platform
-      machine_type = platform.machine()
-
-      if os_type == "darwin" and machine_type == "x86_64":
-          return self._get_macos_core_crypto_link()
-        
-      if os_type == "linux" and machine_type == "x86_64":
-          # TODO: detect Ubuntu only!
-          return self._get_ubuntu_core_crypto_link()
-          
-      sys.exit("Error: OS not supported. We only support Ubuntu and MacOS at the moment.")
-
-  def _get_macos_core_crypto_link(self):
-      return CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + "peacemakr-core-crypto-python-macos-x86_64.tar.gz"
-
-  def _get_ubuntu_core_crypto_link(self):
-      return CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + "peacemakr-core-crypto-python-ubuntu-x86_64.tar.gz"
-
-
   def run(self):
-    """Run command."""
+    """Run command.
+    # TODO: Remind user to set LD_LIBRARY_PATH for Ubuntu in README
+    """
     site_package_dir = next(p for p in sys.path if 'site-packages' in p)
-    core_crypto_link = self._get_core_crypto_link()
-    get_command = "wget -q " + core_crypto_link
-    unzip_command = "tar -zxvf peacemakr-core-crypto-python-macos-x86_64.tar.gz"
+
+    os_type = sys.platform
+    machine_type = platform.machine()
+    tar_filename = ""
+    core_crypto_so_filename = ""
+    core_crypto_shared_filename = ""
+    core_crypto_cpp_shared_filename = ""
+    if os_type == "darwin" and machine_type == "x86_64":
+        tar_filename = "peacemakr-core-crypto-python-macos-x86_64.tar.gz"
+        core_crypto_so_filename = "peacemakr_core_crypto_python.cpython-37m-darwin.so"
+        core_crypto_shared_filename = "libpeacemakr-core-crypto.dylib"
+        core_crypto_cpp_shared_filename = "libpeacemakr-core-crypto-cpp.dylib"
+
+    elif os_type == "linux" and machine_type == "x86_64":
+        # TODO: detect Ubuntu only!
+        tar_filename = "peacemakr-core-crypto-python-ubuntu-x86_64.tar.gz"
+        core_crypto_so_filename = "peacemakr_core_crypto_python.cpython-36m-x86_64-linux-gnu.so"
+        core_crypto_shared_filename = "libpeacemakr-core-crypto.so"
+        core_crypto_cpp_shared_filename = "libpeacemakr-core-crypto-cpp.so"
+
+    else:
+        sys.exit("Error: OS not supported. We only support Ubuntu and MacOS at the moment.")
+
+    get_command = "wget -q " + CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + tar_filename
+    unzip_command = "tar -zxvf " + tar_filename
     
     self._execute_command(get_command.split(" "))
     self._execute_command(unzip_command.split(" "))
 
     # copying file
-    shutil.copyfile("peacemakr_core_crypto_python.cpython-37m-darwin.so", site_package_dir+"/peacemakr_core_crypto_python.cpython-37m-darwin.so")
-    shutil.copyfile("lib/libpeacemakr-core-crypto.dylib", "/usr/local/lib/libpeacemakr-core-crypto.dylib")
-    shutil.copyfile("lib/libpeacemakr-core-crypto-cpp.dylib", "/usr/local/lib/libpeacemakr-core-crypto-cpp.dylib")
+    shutil.copyfile(core_crypto_so_filename, site_package_dir+"/"+core_crypto_so_filename)
+    shutil.copyfile("lib/"+core_crypto_shared_filename, "/usr/local/lib/"+core_crypto_shared_filename)
+    shutil.copyfile("lib/"+core_crypto_cpp_shared_filename, "/usr/local/lib/"+core_crypto_cpp_shared_filename)
 
 
 
