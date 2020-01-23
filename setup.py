@@ -19,6 +19,8 @@ import subprocess
 import setuptools
 import sys
 import os
+import shutil
+import platform
 
 NAME = "peacemakr-sdk"
 VERSION = "0.0.1"
@@ -36,14 +38,14 @@ REQUIRES = [
     "urllib3>=1.23"
 ]
 
+CORE_CRYPTO_URL_BASE="https://github.com/peacemakr-io/peacemakr-core-crypto/releases/download/"
+CORE_CRYPTO_VERSION="v0.2.0/"
+
 class InstallCoreCryptoCommand(distutils.cmd.Command):
   """A custom command to run Pylint on all Python source files."""
 
   description = 'run Pylint on Python source files'
-  user_options = [
-      # The format is (long option, short option, description).
-      ('pylint-rcfile=', None, 'path to Pylint config file'),
-  ]
+  user_options = []
   def initialize_options(self):
     """Set default values for options."""
     pass
@@ -52,32 +54,45 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
     """Post-process options."""
     pass
 
+  def _execute_command(self, command):
+      subprocess.run(command)
+
+  def _get_core_crypto_link(self):
+      # TODO: Detect different python version
+      os_type = sys.platform
+      machine_type = platform.machine()
+
+      if os_type == "darwin" and machine_type == "x86_64":
+          return self._get_macos_core_crypto_link()
+        
+      if os_type == "linux" and machine_type == "x86_64":
+          # TODO: detect Ubuntu only!
+          return self._get_ubuntu_core_crypto_link()
+          
+      sys.exit("Error: OS not supported. We only support Ubuntu and MacOS at the moment.")
+
+  def _get_macos_core_crypto_link(self):
+      return CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + "peacemakr-core-crypto-python-macos-x86_64.tar.gz"
+
+  def _get_ubuntu_core_crypto_link(self):
+      return CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + "peacemakr-core-crypto-python-ubuntu-x86_64.tar.gz"
+
+
   def run(self):
     """Run command."""
     site_package_dir = next(p for p in sys.path if 'site-packages' in p)
-    git_clone_command = ["git" ,"clone", "https://github.com/peacemakr-io/peacemakr-core-crypto.git"]
-    rm_clone_command = ["rm", "-rf", "peacemakr-core-crypto"]
-    install_command = ["cd", "peacemakr-core-crypto/bin", "&&", "./release-python.sh", "local", site_package_dir, "release"]
-    export_env = ["export", "LD_LIBRARY_PATH=/usr/local/lib"]
-    # clone the repo
-    self.announce(
-        'Cloning core-crypto @: %s' % ("https://github.com/peacemakr-io/peacemakr-core-crypto.git"),
-        level=distutils.log.INFO)
-    subprocess.run(git_clone_command)
+    core_crypto_link = self._get_core_crypto_link()
+    get_command = "wget -q " + core_crypto_link
+    unzip_command = "tar -zxvf peacemakr-core-crypto-python-macos-x86_64.tar.gz"
+    
+    self._execute_command(get_command.split(" "))
+    self._execute_command(unzip_command.split(" "))
 
-    # check openssl and cmake
+    # copying file
+    shutil.copyfile("peacemakr_core_crypto_python.cpython-37m-darwin.so", site_package_dir+"/peacemakr_core_crypto_python.cpython-37m-darwin.so")
+    shutil.copyfile("lib/libpeacemakr-core-crypto.dylib", "/usr/local/lib/libpeacemakr-core-crypto.dylib")
+    shutil.copyfile("lib/libpeacemakr-core-crypto-cpp.dylib", "/usr/local/lib/libpeacemakr-core-crypto-cpp.dylib")
 
-    # running release commands
-    self.announce(
-        'Installing core-crytpo into %s %s' % (str(site_package_dir), " ".join(install_command)),
-        level=distutils.log.INFO)
-    os.system(" ".join(install_command))
-
-    # remove peacemakr-core-crypto
-    self.announce(
-        'Removing core-crytpo folder',
-        level=distutils.log.INFO)
-    subprocess.run(rm_clone_command)
 
 
 class BuildPyCommand(setuptools.command.build_py.build_py):
