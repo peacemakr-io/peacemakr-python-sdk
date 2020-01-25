@@ -1,10 +1,10 @@
 name: Upload Python Package
 
-# on:
-#   push:
-#     tags:
-#       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+# on: [push] <- this will release every push, careful
 
 jobs:
   deploy:
@@ -22,7 +22,7 @@ jobs:
       - name: Build and publish
         env:
             TWINE_USERNAME: "__token__"
-            TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+            TWINE_PASSWORD: ${{ secrets.PEACEMAKR_IO_PYPI_PASSWORD }}
         run: |
             python setup.py sdist
             twine upload dist/*
