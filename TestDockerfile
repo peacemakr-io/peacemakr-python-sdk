@@ -6,8 +6,9 @@ ADD requirements.txt \
     setup.py /peacemakr/python/
 ADD peacemakr_sdk ./peacemakr_sdk/
 RUN bash && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
-    && python setup.py install
+    && pip install --no-cache-dir -r requirements.txt
+
+RUN bash && python setup.py install
 
 FROM python:3.7.4-alpine
 
