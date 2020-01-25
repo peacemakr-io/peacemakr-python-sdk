@@ -113,6 +113,7 @@ setup(
     name=NAME,
     version=VERSION,
     description="Peacemakr",
+    python_requires='>=3.6',
     author_email="",
     url="",
     keywords=["Peacemakr"],
