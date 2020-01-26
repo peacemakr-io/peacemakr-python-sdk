@@ -14,18 +14,24 @@ We take security and trust very seriously. If you believe you have found a secur
 
 ## Documentation
 
-See the [API docs](https://github.com/peacemakr-io/peacemakr-python-sdk/tree/docs/docs)
+See the [API docs](https://github.com/peacemakr-io/peacemakr-python-sdk/tree/master/docs)
 
 ## Installation
+Install from pip
+```sh
+pip install --upgrade peacemakr
+```
+
 Install from source
 ```sh
 python setup.py install
 ```
 
-Coming soon: Install from pip
-```sh
-pip install --upgrade peacemakr
-```
+### FAQ
+1. In Linux, peacemakr-core-crypto-cpp.so is not found but the file is there.
+  - Solution: "export LD_LIBRARY_PATH=:/usr/local/lib" >> ~/.bashrc
+ 
+
 
 ### Requirements
 Python 3.6+
@@ -47,19 +53,22 @@ sdk = factory.get_crypto_sdk(api_key=api_key,
                                 )
 
 sdk.register()
+
+sdk.sync()
 ```
 
 ### Encrypt and Decrypt
 It's straightforward to encrypt and decrypt anything with peacmekar library
 ```python
 import os
-import b64encode
 
 random_bytes = os.urandom(100)
 
 encrypted_bytes = sdk.encrypt(random_bytes)
+print(encrypted_bytes)
 
 decrypted_bytes = sdk.decrypt(encrypted_bytes)
+print(decrypted_bytes)
 ```
 
 ## Contributing
