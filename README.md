@@ -52,13 +52,10 @@ sdk.register()
 ### Encrypt and Decrypt
 It's straightforward to encrypt and decrypt anything with peacmekar library
 ```python
-import peacemakr_sdk.factory as factory
 import os
 import b64encode
 
-
-sdk = factory.get_crypto_sdk(api_key=..., client_name=..., peacemakr_hostname=..., persister=...)
-random_bytes = b64encode(os.urandom(100))
+random_bytes = os.urandom(100)
 
 encrypted_bytes = sdk.encrypt(random_bytes)
 
