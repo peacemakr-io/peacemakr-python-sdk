@@ -59,7 +59,7 @@ sdk.register()
 sdk.sync()
 ```
 
-### Encrypt and Decrypt
+### Protecting your Data with Peacemakr's Secure Data Platform
 It's straightforward to encrypt and decrypt anything with peacmekar library
 ```python
 import os
