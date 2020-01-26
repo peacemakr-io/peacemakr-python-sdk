@@ -52,8 +52,10 @@ sdk = factory.get_crypto_sdk(api_key=api_key,
                                 persister=persister
                                 )
 
+# Required call. Registers your client. Requires network connectivity.
 sdk.register()
 
+# Optional call, used to sync configs. Requires network connectivity.
 sdk.sync()
 ```
 
@@ -64,9 +66,11 @@ import os
 
 random_bytes = os.urandom(100)
 
+# To protect data, invoke encrypt. Does not require network connectivity.
 encrypted_bytes = sdk.encrypt(random_bytes)
 print(encrypted_bytes)
 
+# To operate on protect data, invoke decrypt. Does not require network connectivity.
 decrypted_bytes = sdk.decrypt(encrypted_bytes)
 print(decrypted_bytes)
 ```
