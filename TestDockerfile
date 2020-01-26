@@ -1,4 +1,5 @@
 FROM danielhuang37/peacemakr-pycmakessl:latest as builder
+ENV LD_LIBRARY_PATH=/usr/local/lib
 
 WORKDIR /peacemakr/python
 ADD requirements.txt \
