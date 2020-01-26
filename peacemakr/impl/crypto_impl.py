@@ -39,7 +39,6 @@ import json
 import base64
 import sys
 
-PYTHON_SDK_VERSION = "0.0.1"
 PERSISTER_PRIV_KEY = "Priv"
 PERSISTER_PUB_KEY = "Pub"
 PERSISTER_ASYM_TYPE = "AsymmetricKeyType"
