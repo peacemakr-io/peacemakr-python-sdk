@@ -70,7 +70,7 @@ random_bytes = os.urandom(100)
 encrypted_bytes = sdk.encrypt(random_bytes)
 print(encrypted_bytes)
 
-# To operate on protect data, invoke decrypt. Does not require network connectivity.
+# To operate on protected data, invoke decrypt. Does not require network connectivity.
 decrypted_bytes = sdk.decrypt(encrypted_bytes)
 print(decrypted_bytes)
 ```
