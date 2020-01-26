@@ -24,6 +24,7 @@ import platform
 
 NAME = "peacemakr"
 VERSION = "0.0.2.dev0"
+
 # To install the library, run the following
 #
 # python setup.py install
