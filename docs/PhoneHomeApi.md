@@ -1,4 +1,4 @@
-# peacemakr_sdk.PhoneHomeApi
+# peacemakr.PhoneHomeApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -18,19 +18,19 @@ Returns 200 ok if successfully persisted
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.PhoneHomeApi(peacemakr_sdk.generated.ApiClient(configuration))
-log = peacemakr_sdk.Log() # Log | 
+api_instance = peacemakr.PhoneHomeApi(peacemakr.generated.ApiClient(configuration))
+log = peacemakr.Log() # Log | 
 
 try:
     # Used to report back to server a logged event

@@ -1,9 +1,9 @@
 import pytest
-from peacemakr_sdk.generated.api_client import ApiClient
-from peacemakr_sdk.generated.configuration import Configuration
-from peacemakr_sdk.generated.api.org_api import OrgApi
-import peacemakr_sdk.factory as Factory
-from peacemakr_sdk.impl.persister_impl import InMemoryPersister
+from peacemakr.generated.api_client import ApiClient
+from peacemakr.generated.configuration import Configuration
+from peacemakr.generated.api.org_api import OrgApi
+import peacemakr.factory as Factory
+from peacemakr.impl.persister_impl import InMemoryPersister
 
 import os
 import random

@@ -1,4 +1,4 @@
-# peacemakr_sdk.ServerManagementApi
+# peacemakr.ServerManagementApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -18,12 +18,12 @@ Returns 200 if the server is healthy
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.ServerManagementApi()
+api_instance = peacemakr.ServerManagementApi()
 
 try:
     # See if the server is healthy

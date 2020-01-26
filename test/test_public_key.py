@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.public_key import PublicKey  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.public_key import PublicKey  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestPublicKey(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestPublicKey(unittest.TestCase):
     def testPublicKey(self):
         """Test PublicKey"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.public_key.PublicKey()  # noqa: E501
+        # model = peacemakr.generated.models.public_key.PublicKey()  # noqa: E501
         pass
 
 

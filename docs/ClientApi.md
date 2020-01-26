@@ -1,4 +1,4 @@
-# peacemakr_sdk.ClientApi
+# peacemakr.ClientApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -19,19 +19,19 @@ Register a new client
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.ClientApi(peacemakr_sdk.generated.ApiClient(configuration))
-client = peacemakr_sdk.Client() # Client | 
+api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
+client = peacemakr.Client() # Client | 
 
 try:
     # Register a new client
@@ -71,20 +71,20 @@ Register a new public key for the client
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.ClientApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
 client_id = 'client_id_example' # str | 
-new_public_key = peacemakr_sdk.PublicKey() # PublicKey | 
+new_public_key = peacemakr.PublicKey() # PublicKey | 
 
 try:
     # Register a new public key for the client
@@ -125,18 +125,18 @@ Remove an existing organization
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.ClientApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
 client_id = 'client_id_example' # str | 
 
 try:
@@ -177,18 +177,18 @@ Get an existing client
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.ClientApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
 client_id = 'client_id_example' # str | 
 
 try:

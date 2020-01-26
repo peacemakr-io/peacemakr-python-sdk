@@ -5,7 +5,7 @@ WORKDIR /peacemakr/python
 ADD requirements.txt \
     examples/example.py \
     setup.py /peacemakr/python/
-ADD peacemakr_sdk ./peacemakr_sdk/
+ADD peacemakr ./peacemakr/
 RUN bash && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 

@@ -1,4 +1,4 @@
-# peacemakr_sdk.OrgApi
+# peacemakr.OrgApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -26,19 +26,19 @@ Add a new admin to this org
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
-contact = peacemakr_sdk.Contact() # Contact | 
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
+contact = peacemakr.Contact() # Contact | 
 
 try:
     # Add a new admin to this org
@@ -78,18 +78,18 @@ Add a new API Key to an org
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 
 try:
     # Add a new API Key to an org
@@ -126,22 +126,22 @@ Create a new organization. Must be an authenticated request with a valid id_toke
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 id_token = 'id_token_example' # str | 
 stripe_customer_id = 'stripe_customer_id_example' # str | 
 org_name = 'org_name_example' # str | 
-contact = peacemakr_sdk.Contact() # Contact | 
+contact = peacemakr.Contact() # Contact | 
 
 try:
     # Create a new organization. Must be an authenticated request with a valid id_token from a trusted IdP.
@@ -184,18 +184,18 @@ Remove an existing admin from the org (You can not remove the last admin. It wil
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 email = 'email_example' # str | 
 
 try:
@@ -235,18 +235,18 @@ Remove an existing API Key
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 apikey = 'apikey_example' # str | 
 
 try:
@@ -286,18 +286,18 @@ Remove an existing organization
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 org_id = 'org_id_example' # str | 
 
 try:
@@ -337,18 +337,18 @@ Get an access key for the peacemakr shared cloud org (all cloud key derivers mus
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 
 try:
     # Get an access key for the peacemakr shared cloud org (all cloud key derivers must use this)
@@ -385,18 +385,18 @@ Get an existing organization
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 org_id = 'org_id_example' # str | 
 
 try:
@@ -437,18 +437,18 @@ Get an existing Organization
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 apikey = 'apikey_example' # str | 
 
 try:
@@ -489,12 +489,12 @@ Get an ephemeral test org api key
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi()
+api_instance = peacemakr.OrgApi()
 
 try:
     # Get an ephemeral test org api key
@@ -531,18 +531,18 @@ Update the stripe customer Id associated with this account
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.OrgApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.OrgApi(peacemakr.generated.ApiClient(configuration))
 stripe_customer_id = 'stripe_customer_id_example' # str | 
 
 try:

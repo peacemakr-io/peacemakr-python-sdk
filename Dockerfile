@@ -19,7 +19,7 @@ ADD requirements.txt \
     test-requirements.txt \
     examples/example.py \
     setup.py /peacemakr/python/
-ADD peacemakr_sdk /peacemakr/python/peacemakr_sdk/
+ADD peacemakr /peacemakr/python/peacemakr/
 RUN bash && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && python setup.py install

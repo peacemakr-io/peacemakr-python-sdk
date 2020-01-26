@@ -1,4 +1,4 @@
-# peacemakr_sdk.CryptoConfigApi
+# peacemakr.CryptoConfigApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -24,18 +24,18 @@ Add an existing use domain to another crypto config.
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 crypto_config_id = 'crypto_config_id_example' # str | 
 use_domain_id = 'use_domain_id_example' # str | 
 
@@ -77,20 +77,20 @@ Add a new active use domain and attached it to the crypto config.
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 crypto_config_id = 'crypto_config_id_example' # str | 
-new_use_domain = peacemakr_sdk.SymmetricKeyUseDomain() # SymmetricKeyUseDomain | 
+new_use_domain = peacemakr.SymmetricKeyUseDomain() # SymmetricKeyUseDomain | 
 
 try:
     # Add a new active use domain and attached it to the crypto config.
@@ -131,18 +131,18 @@ Get the crypto configurations
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 crypto_config_id = 'crypto_config_id_example' # str | 
 
 try:
@@ -183,18 +183,18 @@ Rapid expiration of existing use doamin and immediately replacment with an ident
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 use_domain_id = 'use_domain_id_example' # str | 
 optional_next_key_derivation_service_id = 'optional_next_key_derivation_service_id_example' # str |  (optional)
 
@@ -236,18 +236,18 @@ Delete a fully expired use domain
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 use_domain_id = 'use_domain_id_example' # str | 
 
 try:
@@ -287,20 +287,20 @@ Update the crypto configuration, ONLY the clientKeyType clientKeyBitlength, and 
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 crypto_config_id = 'crypto_config_id_example' # str | 
-updated_crypto_config = peacemakr_sdk.CryptoConfig() # CryptoConfig | 
+updated_crypto_config = peacemakr.CryptoConfig() # CryptoConfig | 
 
 try:
     # Update the crypto configuration, ONLY the clientKeyType clientKeyBitlength, and clientKeyTTL fields.
@@ -341,18 +341,18 @@ Update an existing crypto config's asymmetricKeyTTL
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 use_domain_id = 'use_domain_id_example' # str | 
 fallback_to_cloud = true # bool | 
 
@@ -394,18 +394,18 @@ Update an existing crypto config's domainSelectorScheme
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 crypto_config_id = 'crypto_config_id_example' # str | 
 new_selector_scheme = 'new_selector_scheme_example' # str | 
 
@@ -447,18 +447,18 @@ Chnage expiration of a use domain
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.CryptoConfigApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.CryptoConfigApi(peacemakr.generated.ApiClient(configuration))
 use_domain_id = 'use_domain_id_example' # str | 
 inception_ttl = 56 # int | 
 encryption_ttl = 56 # int | 
