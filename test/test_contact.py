@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.contact import Contact  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.contact import Contact  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestContact(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestContact(unittest.TestCase):
     def testContact(self):
         """Test Contact"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.contact.Contact()  # noqa: E501
+        # model = peacemakr.generated.models.contact.Contact()  # noqa: E501
         pass
 
 

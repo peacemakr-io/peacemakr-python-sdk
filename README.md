@@ -24,7 +24,7 @@ python setup.py install
 
 Coming soon: Install from pip
 ```sh
-pip install --upgrade peacemakr_sdk
+pip install --upgrade peacemakr
 ```
 
 ### Requirements
@@ -35,8 +35,8 @@ The library requires your API key from the dashboard which is available at https
 
 Set the API key and initialize the persister to start using the SDK.
 ```python
-import peacemakr_sdk as p
-import peacemakr_sdk.factory as factory
+import peacemakr as p
+import peacemakr.factory as factory
 
 api_key = "api-key"
 persister = p.InMemoryPersister()

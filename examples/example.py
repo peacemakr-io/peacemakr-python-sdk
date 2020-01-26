@@ -1,5 +1,5 @@
-import peacemakr_sdk
-import peacemakr_sdk.factory as Factory
+import peacemakr
+import peacemakr.factory as Factory
 
 
 def main():

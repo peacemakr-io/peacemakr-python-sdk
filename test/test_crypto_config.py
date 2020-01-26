@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.crypto_config import CryptoConfig  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.crypto_config import CryptoConfig  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestCryptoConfig(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestCryptoConfig(unittest.TestCase):
     def testCryptoConfig(self):
         """Test CryptoConfig"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.crypto_config.CryptoConfig()  # noqa: E501
+        # model = peacemakr.generated.models.crypto_config.CryptoConfig()  # noqa: E501
         pass
 
 

@@ -1,4 +1,4 @@
-# peacemakr_sdk.LoginApi
+# peacemakr.LoginApi
 
 All URIs are relative to *http://api.peacemakr.io/api/v1*
 
@@ -18,12 +18,12 @@ After aquiring and OAuth2 openId id_token from IdP (like google login), present 
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.LoginApi()
+api_instance = peacemakr.LoginApi()
 id_token = 'id_token_example' # str | 
 
 try:
@@ -64,18 +64,18 @@ Invite (bind) an existing user that is not already bound to an org, to your org
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.LoginApi(peacemakr.generated.ApiClient(configuration))
 email = 'email_example' # str | 
 
 try:
@@ -115,18 +115,18 @@ Uninvite (remove) an existing user that is part of your org
 ```python
 from __future__ import print_function
 import time
-import peacemakr_sdk
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
-configuration = peacemakr_sdk.Configuration()
+configuration = peacemakr.Configuration()
 configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr_sdk.LoginApi(peacemakr_sdk.generated.ApiClient(configuration))
+api_instance = peacemakr.LoginApi(peacemakr.generated.ApiClient(configuration))
 email = 'email_example' # str | 
 
 try:

@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.api_key import APIKey  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.api_key import APIKey  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestAPIKey(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestAPIKey(unittest.TestCase):
     def testAPIKey(self):
         """Test APIKey"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.api_key.APIKey()  # noqa: E501
+        # model = peacemakr.generated.models.api_key.APIKey()  # noqa: E501
         pass
 
 

@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.symmetric_key_request import SymmetricKeyRequest  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.symmetric_key_request import SymmetricKeyRequest  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestSymmetricKeyRequest(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestSymmetricKeyRequest(unittest.TestCase):
     def testSymmetricKeyRequest(self):
         """Test SymmetricKeyRequest"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.symmetric_key_request.SymmetricKeyRequest()  # noqa: E501
+        # model = peacemakr.generated.models.symmetric_key_request.SymmetricKeyRequest()  # noqa: E501
         pass
 
 

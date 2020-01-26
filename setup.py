@@ -22,7 +22,7 @@ import os
 import shutil
 import platform
 
-NAME = "peacemakr-sdk"
+NAME = "peacemakr"
 VERSION = "0.0.1"
 # To install the library, run the following
 #

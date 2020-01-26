@@ -15,9 +15,9 @@ from __future__ import absolute_import
 
 import unittest
 
-import peacemakr_sdk
-from peacemakr_sdk.generated.models.login_response import LoginResponse  # noqa: E501
-from peacemakr_sdk.generated.rest import ApiException
+import peacemakr
+from peacemakr.generated.models.login_response import LoginResponse  # noqa: E501
+from peacemakr.generated.rest import ApiException
 
 
 class TestLoginResponse(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestLoginResponse(unittest.TestCase):
     def testLoginResponse(self):
         """Test LoginResponse"""
         # FIXME: construct object with mandatory attributes with example values
-        # model = peacemakr_sdk.generated.models.login_response.LoginResponse()  # noqa: E501
+        # model = peacemakr.generated.models.login_response.LoginResponse()  # noqa: E501
         pass
 
 
