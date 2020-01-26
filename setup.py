@@ -23,7 +23,7 @@ import shutil
 import platform
 
 NAME = "peacemakr"
-VERSION = "0.0.1"
+VERSION = "0.0.2.dev0"
 # To install the library, run the following
 #
 # python setup.py install
@@ -35,7 +35,8 @@ REQUIRES = [
     "certifi>=2017.4.17",
     "python-dateutil>=2.1",
     "six>=1.10",
-    "urllib3>=1.23"
+    "urllib3>=1.23",
+    "distro",
 ]
 
 CORE_CRYPTO_URL_BASE="https://github.com/peacemakr-io/peacemakr-core-crypto/releases/download/"
@@ -168,7 +169,7 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
         import distro
         linux_distribution = distro.linux_distribution(full_distribution_name=False)[0]
         
-        if linux_distribution in ["debian", "ubuntu"] and machine_type == "x86_64" and self._is_pyversion_in_range(python_version, '3', '7'):
+        if linux_distribution in ["debian", "ubuntu"] and machine_type == "x86_64" and self._is_pyversion_in_range(python_version, '3', '6'):
             # install from artifact
             tar_filename = "peacemakr-core-crypto-python-ubuntu-x86_64.tar.gz"
             core_crypto_so_filename = "peacemakr_core_crypto_python.cpython-36m-x86_64-linux-gnu.so"
