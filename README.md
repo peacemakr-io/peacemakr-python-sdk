@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-    <img src="https://github.com/peacemakr-io/peacemakr-admin-portal/blob/master/peacemakr-admin/public/images/PeacemakrP-Golden.png" width="150"/>
+    <img src="https://admin.peacemakr.io/images/PeacemakrP-Golden.png" width="150"/>
   <br>
 </p>
 
