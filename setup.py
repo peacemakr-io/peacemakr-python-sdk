@@ -37,7 +37,7 @@ REQUIRES = [
     "python-dateutil>=2.1",
     "six>=1.10",
     "urllib3>=1.23",
-    "distro",
+    "distro>=1.4.0",
 ]
 
 CORE_CRYPTO_URL_BASE="https://github.com/peacemakr-io/peacemakr-core-crypto/releases/download/"
@@ -72,6 +72,7 @@ class InstallCoreCryptoCommand(distutils.cmd.Command):
     return tuple[0] == major_version and tuple[1] == minor_version
 
   def _install_from_artifact(self, tar_filename, core_crypto_so_filename, core_crypto_shared_filename, core_crypto_cpp_shared_filename):
+    self.announce("Installing from artifact", level=distutils.log.INFO)
     site_package_dir = next(p for p in sys.path if 'site-packages' in p)
     get_command = "wget -q " + CORE_CRYPTO_URL_BASE + CORE_CRYPTO_VERSION + "/" + tar_filename
     unzip_command = "tar -zxvf " + tar_filename
@@ -206,6 +207,7 @@ setup(
     url="",
     keywords=["Peacemakr"],
     install_requires=REQUIRES,
+    setup_requires=['distro'],
     packages=find_packages(),
     include_package_data=True,
     long_description="""\
