@@ -21,6 +21,10 @@ Install from pip
 ```sh
 pip install --upgrade peacemakr
 ```
+Install from pip3 on mac,
+```sh
+python3 -m pip install peacemakr
+```
 
 Install from source
 ```sh
