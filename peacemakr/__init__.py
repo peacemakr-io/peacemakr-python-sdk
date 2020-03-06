@@ -63,3 +63,5 @@ from peacemakr.impl.crypto_impl import CryptoImpl
 from peacemakr.impl.persister_impl import InMemoryPersister
 
 from peacemakr.factory import get_crypto_sdk
+
+__version__ = "0.0.2"
