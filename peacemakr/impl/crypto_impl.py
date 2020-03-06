@@ -64,8 +64,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         assert logger is None or isinstance(logger, logging.Logger)
         if not client_name:
             raise MissingClientNameError("A client name is required")
-        if not api_key:
-            raise MissingAPIKeyError("An API key is required")
+        # if not api_key:
+        #     raise MissingAPIKeyError("An API key is required")
         if not persister or not isinstance(persister, Persister):
             raise MissingPersisterError("A persister is required")
 
@@ -107,6 +107,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __update_config_by_elasped_time(self, max_elasped_time: int = 60*60*24):
         ''' update the config if program elasped more than `max_elasped_time` since the last update
         '''
+        if self.api_key == "":
+            return 
         now = time.time()
         if (now - self.__last_updated_time) > max_elasped_time:
             # add logger
@@ -245,6 +247,8 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return select_digest[digest_algorithm]
 
     def __verify_bootstrapped_and_registered(self):
+        if self.api_key == "":
+            return
         if not self.__is_registered() or not self.__is_bootstrapped():
             self.logger.warning("SDK was not registered, please register before using other SDK operations")
             raise PeacemakrError("SDK was not registered, please register before using other SDK operations")
@@ -410,6 +414,28 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def register(self):
+        # check for empty API Key
+        if self.api_key == "":
+            self.logger.info("Warning: No Api key detected, using local-only test settings for client")
+            
+            self.persister.save(PERSISTER_CLIENTID_KEY, "my-client-id")
+            self.persister.save(PERSISTER_PREFERRED_KEYID, "my-public-key-id")
+            
+            self.crypto_config = CryptoConfig(
+                id="my-crypto-config-id",
+                owner_org_id="my-org-id",
+                client_key_bitlength=256,
+                client_key_type="ec",
+                client_key_ttl=(int)(3.15576 * 10**7),
+                symmetric_key_use_domains=[],
+                symmetric_key_use_domain_selector_scheme="my-symmetric-key-use-domain-selector-scheme",
+            )
+
+            pub_key = self.__gen_new_asymmetric_keypair(self.persister)
+            self.persister.save("my-public-key-id", pub_key.key)
+            return
+            
+            
         # check is register and is boostrap, if not initialize
         if self.__is_registered():
             if not self.__is_bootstrapped():
@@ -442,6 +468,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def sync(self):
+        if self.api_key == "":
+            self.logger.warn("No syncing occured beacuse there is no API Key found")
+            return
+
         self.__verify_bootstrapped_and_registered()
         crypto_config_api = CryptoConfigApi(self.__get_client())
 
@@ -484,6 +514,10 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __get_key(self, key_id: str) -> bytes:
         assert isinstance(key_id, str)
 
+        if key_id == "local-test-only-key":
+            key = bytes([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31])
+            return key
+
         if key_id in self.__sym_key_cache:
             return self.__sym_key_cache[key_id]
 
@@ -515,6 +549,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def encrypt(self, plain_text: bytes) -> bytes:
         assert isinstance(plain_text, bytes)
 
+        if self.api_key == "":
+            return self.encrypt_in_domain(plain_text, "my-user-domain")
+
         self.__verify_bootstrapped_and_registered()
         self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
         used_domain_name = self.__select_use_domain_name()
@@ -523,6 +560,17 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def encrypt_in_domain(self, plain_text: bytes, use_domain_name: str) -> bytes:
         assert isinstance(plain_text, bytes)
         assert isinstance(use_domain_name, str)
+        random_device = p.RandomDevice()
+
+        if self.api_key == "":
+
+            key = p.Key(DEFAULT_SYMM_CIPHER, self.__get_key("local-test-only-key"))
+            aad = CiphertextAAD("local-test-only-key", self.persister.load(PERSISTER_PREFERRED_KEYID))
+            json_bytes = bytes(json.dumps(aad.__dict__), encoding='utf8')
+            pm_plain_text = p.Plaintext(plain_text, json_bytes)
+            cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
+            return self.__crypto_context.serialize(DEFAULT_MESSAGE_DIGEST, cipher_text).encode(encoding='UTF-8')
+
 
         self.__verify_bootstrapped_and_registered()
         self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
@@ -540,10 +588,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
         json_bytes = bytes(json.dumps(aad.__dict__), encoding='utf8')
 
         pm_plain_text = p.Plaintext(plain_text, json_bytes)
-        random_device = p.RandomDevice()
+        
 
         cipher_text = self.__crypto_context.encrypt(key, pm_plain_text, random_device)
 
+        
         if not self.__crypto_context.sign(signing_key, pm_plain_text, digest, cipher_text):
             self.logger.warning('Signing failed. Verification not required when decrypting.')
 
@@ -586,6 +635,14 @@ class CryptoImpl(PeacemakrCryptoSDK):
         cipher_text_blob, cfg = self.__crypto_context.deserialize(cipher_text)
         aad = self.__crypto_context.extract_unverified_aad(cipher_text).aad
         aad = self.__parse_cipher_text_AAD(aad)
+
+        if self.api_key == "":
+            key = self.__get_key(aad.cryptoKeyID)
+            pmKey = p.Key(p.SymmetricCipher(DEFAULT_SYMM_CIPHER), key)
+            plain_text, _ = self.__crypto_context.decrypt(pmKey, cipher_text_blob)
+
+            return plain_text.data
+
         if not self.__is_key_id_decryption_viable(aad.cryptoKeyID):
             self.logger.warning("Ciphertext is no longer viable for decryption")
             raise NoValidUseDomainsForDecryptionError("Ciphertext is no longer viable for decryption")
