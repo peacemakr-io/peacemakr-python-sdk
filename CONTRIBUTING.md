@@ -2,12 +2,10 @@
 
 ## PR Guidelines
 1. Please test locally before making a PR.
-2. Please use `go fmt` judiciously. It makes it easier for everyone.
-3. Update the README.md if necessary, lowering the barrier to entry is what this project is about
+2. Update the README.md if necessary, lowering the barrier to entry is what this project is about
    and a big part of that is a good README.
-4. You may merge the PR once you have the sign-off of one of the project maintainers. If
+3. You may merge the PR once you have the sign-off of one of the project maintainers. If
    you do not have permission to do so, please ask the reviewer to do so for you.
-5. The internal `pkg/crypto` package is auto-generated. Changes to that package will not be merged.
 
 ## Our Pledge
 

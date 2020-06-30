@@ -14,7 +14,6 @@ from base64 import b64encode
 # set up
 @pytest.fixture
 def setup_params():
-    
     # set up test address
     test_url = os.getenv("PEACEMAKR_TEST_URL", "http://localhost:8080")
 
