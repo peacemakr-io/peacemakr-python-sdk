@@ -274,7 +274,6 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def __update_local_crypto_config(self, new_config: p.CryptoConfig):
-        assert isinstance(new_config, p.CryptoConfig)
         cur_asymmetric_key_type = self.persister.load(PERSISTER_ASYM_TYPE)
         if cur_asymmetric_key_type != new_config.client_key_type:
             self.logger.info("update client asymmetric key type and crypto config from {} to {}".format(cur_asymmetric_key_type, new_config.client_key_type))
