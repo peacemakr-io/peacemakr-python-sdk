@@ -461,9 +461,13 @@ class CryptoImpl(PeacemakrCryptoSDK):
         return domain.creation_time + domain.symmetric_key_encryption_use_ttl > now_in_seconds \
                and domain.creation_time + domain.symmetric_key_inception_ttl <= now_in_seconds
 
-    def __select_use_domain_name(self) -> str:
+    def __select_use_domain_name(self,  my_org_id: str = "") -> str:
+        """
+        select use domain name is used in encrypt to select valid domain used for encryption
+        """
         domains = self.crypto_config.symmetric_key_use_domains
-        valid_for_encryption = [d for d in domains if self.__domain_is_valid_for_encryption(d)]
+        valid_for_encryption = [d for d in domains if self.__domain_is_valid_for_encryption(d) and d.symmetric_key_encryption_allowed and
+                                         (d.owner_org_id == my_org_id or my_org_id == "")]
         return random_index(valid_for_encryption) if valid_for_encryption else None
 
     def __get_valid_use_domain_for_encryption(self, use_domain_name: str) -> SymmetricKeyUseDomain:
@@ -517,7 +521,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         self.__verify_bootstrapped_and_registered()
         self.__update_config_by_elasped_time(MAX_ELASPED_TIME)
-        used_domain_name = self.__select_use_domain_name()
+        used_domain_name = self.__select_use_domain_name(self.crypto_config.owner_org_id)
         return self.encrypt_in_domain(plain_text, used_domain_name.name)
 
     def encrypt_in_domain(self, plain_text: bytes, use_domain_name: str) -> bytes:
