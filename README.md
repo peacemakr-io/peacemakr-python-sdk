@@ -4,7 +4,7 @@
   <br>
 </p>
 
-# Peacemakr Python Library
+# Peacemakr E2E-Encryption-as-a-Service Python SDK
 
 ![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/Build%20%26%20Test/badge.svg)
 
