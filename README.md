@@ -8,7 +8,7 @@
 
 ![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/Build%20%26%20Test/badge.svg)
 
-Peacemakr's Secure Data Python SDK abstracts away all the hard problems of data security behind a simple interface.
+Peacemakr's E2E-Encryption-as-a-Service SDK solves all the hard problem of E2E-Encryption, and provides consistent solution with a simple interface.
 
 We take security and trust very seriously. If you believe you have found a security issue, please responsibly disclose by [contacting us](mailto:security@peacemakr.io).
 
@@ -63,7 +63,7 @@ sdk.register()
 sdk.sync()
 ```
 
-### Protecting your Data with Peacemakr's Secure Data Platform
+### Protecting your Data with Peacemakr's E2E-Encryption-as-a-Service
 It's straightforward to encrypt and decrypt anything with peacmekar library
 ```python
 import os
