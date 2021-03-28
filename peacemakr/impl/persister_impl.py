@@ -1,5 +1,5 @@
 import os
-
+import pickle
 from peacemakr.persister_base import Persister
 
 class InMemoryPersister(Persister):
@@ -29,7 +29,7 @@ class InMemoryPersister(Persister):
             self.__persister[key] = value
             path = os.path.join(self.__prefix, key)
             with open(path, "w+") as f:
-                f.write(value)
+                f.write(pickle.dumps(value))
 
         def load(self, key):
             # If the value is in the cache, then return it
@@ -41,7 +41,7 @@ class InMemoryPersister(Persister):
                 return None
             # Read the file and return its contents
             with open(path, "r") as f:
-                return f.read()
+                return pickle.loads(f.read())
 
         def exists(self, key):
             path = os.path.join(self.__prefix, key)
