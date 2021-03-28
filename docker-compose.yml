@@ -14,7 +14,7 @@ services:
     image: gcr.io/peacekube/key-derivation-service:latest
     environment:
       - PEACEMAKR_KEYDERIVER_PEACEMAKR_BOOTSTRAPPRIVATEKEYLOCATION=/keys/bootstrap
-      - PEACEMAKR_KEYDERIVER_PEACEMAKR_HOST=peacemakr-services
+      - PEACEMAKR_KEYDERIVER_PEACEMAKR_HOST=http://peacemakr-services
     depends_on:
       - peacemakr-services
     links:
