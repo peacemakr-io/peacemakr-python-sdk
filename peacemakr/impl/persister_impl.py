@@ -11,6 +11,8 @@ class InMemoryPersister(Persister):
         self.__persister[key] = value
 
     def load(self, key):
+        if not self.exists(key):
+            return None
         return self.__persister[key]
 
     def exists(self, key):
