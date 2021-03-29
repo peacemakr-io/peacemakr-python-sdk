@@ -139,6 +139,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         crypto_config_api = CryptoConfigApi(api_client=api_client)
         try:
             self.crypto_config = crypto_config_api.get_crypto_config(self.org.crypto_config_id)
+            print(self.crypto_config)
         except ApiException as e:
             self.logger.warning("Exception in getting crypto config: {}".format(e))
             raise ServerError(e)
@@ -463,6 +464,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def __select_use_domain_name(self) -> str:
         domains = self.crypto_config.symmetric_key_use_domains
+        print(domains)
         valid_for_encryption = [d for d in domains if self.__domain_is_valid_for_encryption(d)]
         return random_index(valid_for_encryption) if valid_for_encryption else None
 

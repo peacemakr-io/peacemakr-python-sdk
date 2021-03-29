@@ -23,9 +23,9 @@ import tempfile
 import six
 from six.moves.urllib.parse import quote
 
-from peacemakr.generated.configuration import Configuration
-import peacemakr.generated.models
-from peacemakr.generated import rest
+from peacemakr.configuration import Configuration
+import peacemakr.models
+from peacemakr import rest
 
 
 class ApiClient(object):
@@ -266,7 +266,7 @@ class ApiClient(object):
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                klass = getattr(peacemakr.generated.models, klass)
+                klass = getattr(peacemakr.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)

@@ -115,8 +115,8 @@ class CryptoConfig(object):
         :param symmetric_key_use_domains: The symmetric_key_use_domains of this CryptoConfig.  # noqa: E501
         :type: list[SymmetricKeyUseDomain]
         """
-        if symmetric_key_use_domains is None:
-            raise ValueError("Invalid value for `symmetric_key_use_domains`, must not be `None`")  # noqa: E501
+        # if symmetric_key_use_domains is None:
+        #     raise ValueError("Invalid value for `symmetric_key_use_domains`, must not be `None`")  # noqa: E501
 
         self._symmetric_key_use_domains = symmetric_key_use_domains
 

@@ -33,6 +33,119 @@ class CryptoConfigApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
+    def add_collaborator(self, use_domain_id, collaborating_org_id, id_token, **kwargs):  # noqa: E501
+        """Add a collaborating org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_collaborator(use_domain_id, collaborating_org_id, id_token, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str use_domain_id: (required)
+        :param str collaborating_org_id: (required)
+        :param str id_token: (required)
+        :return: TinyOrg
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.add_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, **kwargs)  # noqa: E501
+        else:
+            (data) = self.add_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, **kwargs)  # noqa: E501
+            return data
+
+    def add_collaborator_with_http_info(self, use_domain_id, collaborating_org_id, id_token, **kwargs):  # noqa: E501
+        """Add a collaborating org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str use_domain_id: (required)
+        :param str collaborating_org_id: (required)
+        :param str id_token: (required)
+        :return: TinyOrg
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['use_domain_id', 'collaborating_org_id', 'id_token']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method add_collaborator" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'use_domain_id' is set
+        if ('use_domain_id' not in params or
+                params['use_domain_id'] is None):
+            raise ValueError("Missing the required parameter `use_domain_id` when calling `add_collaborator`")  # noqa: E501
+        # verify the required parameter 'collaborating_org_id' is set
+        if ('collaborating_org_id' not in params or
+                params['collaborating_org_id'] is None):
+            raise ValueError("Missing the required parameter `collaborating_org_id` when calling `add_collaborator`")  # noqa: E501
+        # verify the required parameter 'id_token' is set
+        if ('id_token' not in params or
+                params['id_token'] is None):
+            raise ValueError("Missing the required parameter `id_token` when calling `add_collaborator`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'use_domain_id' in params:
+            path_params['useDomainId'] = params['use_domain_id']  # noqa: E501
+
+        query_params = []
+        if 'collaborating_org_id' in params:
+            query_params.append(('collaboratingOrgId', params['collaborating_org_id']))  # noqa: E501
+        if 'id_token' in params:
+            query_params.append(('idToken', params['id_token']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/crypto/useDomain/{useDomainId}/collaborator', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='TinyOrg',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def add_existing_use_domain(self, crypto_config_id, use_domain_id, **kwargs):  # noqa: E501
         """Add an existing use domain to another crypto config.  # noqa: E501
 
@@ -427,6 +540,119 @@ class CryptoConfigApi(object):
 
         return self.api_client.call_api(
             '/crypto/useDomain/{useDomainId}/rapidRotation', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def remove_collaborator(self, use_domain_id, collaborating_org_id, id_token, **kwargs):  # noqa: E501
+        """Remove a collaborating org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.remove_collaborator(use_domain_id, collaborating_org_id, id_token, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str use_domain_id: (required)
+        :param str collaborating_org_id: (required)
+        :param str id_token: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.remove_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, **kwargs)  # noqa: E501
+        else:
+            (data) = self.remove_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, **kwargs)  # noqa: E501
+            return data
+
+    def remove_collaborator_with_http_info(self, use_domain_id, collaborating_org_id, id_token, **kwargs):  # noqa: E501
+        """Remove a collaborating org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.remove_collaborator_with_http_info(use_domain_id, collaborating_org_id, id_token, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str use_domain_id: (required)
+        :param str collaborating_org_id: (required)
+        :param str id_token: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['use_domain_id', 'collaborating_org_id', 'id_token']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method remove_collaborator" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'use_domain_id' is set
+        if ('use_domain_id' not in params or
+                params['use_domain_id'] is None):
+            raise ValueError("Missing the required parameter `use_domain_id` when calling `remove_collaborator`")  # noqa: E501
+        # verify the required parameter 'collaborating_org_id' is set
+        if ('collaborating_org_id' not in params or
+                params['collaborating_org_id'] is None):
+            raise ValueError("Missing the required parameter `collaborating_org_id` when calling `remove_collaborator`")  # noqa: E501
+        # verify the required parameter 'id_token' is set
+        if ('id_token' not in params or
+                params['id_token'] is None):
+            raise ValueError("Missing the required parameter `id_token` when calling `remove_collaborator`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'use_domain_id' in params:
+            path_params['useDomainId'] = params['use_domain_id']  # noqa: E501
+
+        query_params = []
+        if 'collaborating_org_id' in params:
+            query_params.append(('collaboratingOrgId', params['collaborating_org_id']))  # noqa: E501
+        if 'id_token' in params:
+            query_params.append(('idToken', params['id_token']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/crypto/useDomain/{useDomainId}/collaborator', 'DELETE',
             path_params,
             query_params,
             header_params,

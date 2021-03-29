@@ -16,6 +16,7 @@ from __future__ import absolute_import
 
 # import models into model package
 from peacemakr.generated.models.api_key import APIKey
+from peacemakr.generated.models.add_organization_parameters import AddOrganizationParameters
 from peacemakr.generated.models.client import Client
 from peacemakr.generated.models.contact import Contact
 from peacemakr.generated.models.crypto_config import CryptoConfig
@@ -25,7 +26,12 @@ from peacemakr.generated.models.heatbeat_response import HeatbeatResponse
 from peacemakr.generated.models.key_derivation_instance import KeyDerivationInstance
 from peacemakr.generated.models.log import Log
 from peacemakr.generated.models.login_response import LoginResponse
+from peacemakr.generated.models.manual_auth_n_parameters import ManualAuthNParameters
+from peacemakr.generated.models.oidc_auth_n_parameters import OIDCAuthNParameters
 from peacemakr.generated.models.organization import Organization
+from peacemakr.generated.models.paged_array import PagedArray
+from peacemakr.generated.models.pricing_plan import PricingPlan
 from peacemakr.generated.models.public_key import PublicKey
 from peacemakr.generated.models.symmetric_key_request import SymmetricKeyRequest
 from peacemakr.generated.models.symmetric_key_use_domain import SymmetricKeyUseDomain
+from peacemakr.generated.models.tiny_org import TinyOrg

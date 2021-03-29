@@ -2,6 +2,10 @@ version: '3'
 services:
   peacemakr-services:
     image: gcr.io/peacekube/peacemakr-services:latest
+    expose:
+      - "80"
+      - "9292"
+      - "40000"
     depends_on:
       - redis
     security_opt:
@@ -23,6 +27,9 @@ services:
       - seccomp:unconfined
     cap_add:
       - SYS_PTRACE
+    volumes:
+      - /private/tmp/peacemakr.io/keyderiver:/keyderiver
+      - /private/tmp/peacemakr.io/master:/master
   redis:
     image: "redis:alpine"
   test:

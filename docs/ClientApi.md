@@ -8,6 +8,8 @@ Method | HTTP request | Description
 [**add_client_public_key**](ClientApi.md#add_client_public_key) | **POST** /client/{clientId}/addPublicKey | Register a new public key for the client
 [**delete_client**](ClientApi.md#delete_client) | **DELETE** /client/{clientId} | Remove an existing organization
 [**get_client**](ClientApi.md#get_client) | **GET** /client/{clientId} | Get an existing client
+[**return_paged_client_ids**](ClientApi.md#return_paged_client_ids) | **GET** /client | Returns a page of clientIds that belong to the authenticated org
+[**return_paged_clients**](ClientApi.md#return_paged_clients) | **GET** /client/multiple | Returns a page of client objects that belong to the authenticated org
 
 
 # **add_client**
@@ -20,7 +22,7 @@ Register a new client
 from __future__ import print_function
 import time
 import peacemakr
-from peacemakr.generated.rest import ApiException
+from peacemakr.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -30,7 +32,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
 client = peacemakr.Client() # Client | 
 
 try:
@@ -72,7 +74,7 @@ Register a new public key for the client
 from __future__ import print_function
 import time
 import peacemakr
-from peacemakr.generated.rest import ApiException
+from peacemakr.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -82,7 +84,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
 client_id = 'client_id_example' # str | 
 new_public_key = peacemakr.PublicKey() # PublicKey | 
 
@@ -126,7 +128,7 @@ Remove an existing organization
 from __future__ import print_function
 import time
 import peacemakr
-from peacemakr.generated.rest import ApiException
+from peacemakr.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -136,7 +138,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
 client_id = 'client_id_example' # str | 
 
 try:
@@ -178,7 +180,7 @@ Get an existing client
 from __future__ import print_function
 import time
 import peacemakr
-from peacemakr.generated.rest import ApiException
+from peacemakr.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -188,7 +190,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr.ClientApi(peacemakr.generated.ApiClient(configuration))
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
 client_id = 'client_id_example' # str | 
 
 try:
@@ -208,6 +210,114 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**Client**](Client.md)
+
+### Authorization
+
+[header](../README.md#header)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **return_paged_client_ids**
+> PagedArray return_paged_client_ids(page, page_size)
+
+Returns a page of clientIds that belong to the authenticated org
+
+### Example
+```python
+from __future__ import print_function
+import time
+import peacemakr
+from peacemakr.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: header
+configuration = peacemakr.Configuration()
+configuration.api_key['authorization'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['authorization'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
+page = 789 # int | 
+page_size = 789 # int | 
+
+try:
+    # Returns a page of clientIds that belong to the authenticated org
+    api_response = api_instance.return_paged_client_ids(page, page_size)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling ClientApi->return_paged_client_ids: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **page** | **int**|  | 
+ **page_size** | **int**|  | 
+
+### Return type
+
+[**PagedArray**](PagedArray.md)
+
+### Authorization
+
+[header](../README.md#header)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **return_paged_clients**
+> list[Client] return_paged_clients(page, page_size)
+
+Returns a page of client objects that belong to the authenticated org
+
+### Example
+```python
+from __future__ import print_function
+import time
+import peacemakr
+from peacemakr.rest import ApiException
+from pprint import pprint
+
+# Configure API key authorization: header
+configuration = peacemakr.Configuration()
+configuration.api_key['authorization'] = 'YOUR_API_KEY'
+# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+# configuration.api_key_prefix['authorization'] = 'Bearer'
+
+# create an instance of the API class
+api_instance = peacemakr.ClientApi(peacemakr.generated.apiClient(configuration))
+page = 789 # int | 
+page_size = 789 # int | 
+
+try:
+    # Returns a page of client objects that belong to the authenticated org
+    api_response = api_instance.return_paged_clients(page, page_size)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling ClientApi->return_paged_clients: %s\n" % e)
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **page** | **int**|  | 
+ **page_size** | **int**|  | 
+
+### Return type
+
+[**list[Client]**](Client.md)
 
 ### Authorization
 

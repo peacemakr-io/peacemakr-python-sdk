@@ -3,6 +3,7 @@ from __future__ import absolute_import
 # flake8: noqa
 
 # import apis into api package
+from peacemakr.generated.api.billing_api import BillingApi
 from peacemakr.generated.api.client_api import ClientApi
 from peacemakr.generated.api.crypto_config_api import CryptoConfigApi
 from peacemakr.generated.api.key_derivation_service_registry_api import KeyDerivationServiceRegistryApi

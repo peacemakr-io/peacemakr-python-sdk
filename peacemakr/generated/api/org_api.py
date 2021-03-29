@@ -219,49 +219,146 @@ class OrgApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def add_organization(self, id_token, stripe_customer_id, org_name, contact, **kwargs):  # noqa: E501
+    def add_id_p_to_org(self, new_id_ps, **kwargs):  # noqa: E501
+        """Add the IdP specified in the body  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_id_p_to_org(new_id_ps, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param list[OIDCAuthNParameters] new_id_ps: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.add_id_p_to_org_with_http_info(new_id_ps, **kwargs)  # noqa: E501
+        else:
+            (data) = self.add_id_p_to_org_with_http_info(new_id_ps, **kwargs)  # noqa: E501
+            return data
+
+    def add_id_p_to_org_with_http_info(self, new_id_ps, **kwargs):  # noqa: E501
+        """Add the IdP specified in the body  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_id_p_to_org_with_http_info(new_id_ps, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param list[OIDCAuthNParameters] new_id_ps: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['new_id_ps']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method add_id_p_to_org" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'new_id_ps' is set
+        if ('new_id_ps' not in params or
+                params['new_id_ps'] is None):
+            raise ValueError("Missing the required parameter `new_id_ps` when calling `add_id_p_to_org`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'new_id_ps' in params:
+            body_params = params['new_id_ps']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/org/idp', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def add_organization(self, id_token, org_name, params, **kwargs):  # noqa: E501
         """Create a new organization. Must be an authenticated request with a valid id_token from a trusted IdP.  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.add_organization(id_token, stripe_customer_id, org_name, contact, async_req=True)
+        >>> thread = api.add_organization(id_token, org_name, params, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
         :param str id_token: (required)
-        :param str stripe_customer_id: (required)
         :param str org_name: (required)
-        :param Contact contact: (required)
+        :param AddOrganizationParameters params: (required)
+        :param str stripe_customer_id:
         :return: Organization
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.add_organization_with_http_info(id_token, stripe_customer_id, org_name, contact, **kwargs)  # noqa: E501
+            return self.add_organization_with_http_info(id_token, org_name, params, **kwargs)  # noqa: E501
         else:
-            (data) = self.add_organization_with_http_info(id_token, stripe_customer_id, org_name, contact, **kwargs)  # noqa: E501
+            (data) = self.add_organization_with_http_info(id_token, org_name, params, **kwargs)  # noqa: E501
             return data
 
-    def add_organization_with_http_info(self, id_token, stripe_customer_id, org_name, contact, **kwargs):  # noqa: E501
+    def add_organization_with_http_info(self, id_token, org_name, params, **kwargs):  # noqa: E501
         """Create a new organization. Must be an authenticated request with a valid id_token from a trusted IdP.  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.add_organization_with_http_info(id_token, stripe_customer_id, org_name, contact, async_req=True)
+        >>> thread = api.add_organization_with_http_info(id_token, org_name, params, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
         :param str id_token: (required)
-        :param str stripe_customer_id: (required)
         :param str org_name: (required)
-        :param Contact contact: (required)
+        :param AddOrganizationParameters params: (required)
+        :param str stripe_customer_id:
         :return: Organization
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['id_token', 'stripe_customer_id', 'org_name', 'contact']  # noqa: E501
+        all_params = ['id_token', 'org_name', 'params', 'stripe_customer_id']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -280,18 +377,14 @@ class OrgApi(object):
         if ('id_token' not in params or
                 params['id_token'] is None):
             raise ValueError("Missing the required parameter `id_token` when calling `add_organization`")  # noqa: E501
-        # verify the required parameter 'stripe_customer_id' is set
-        if ('stripe_customer_id' not in params or
-                params['stripe_customer_id'] is None):
-            raise ValueError("Missing the required parameter `stripe_customer_id` when calling `add_organization`")  # noqa: E501
         # verify the required parameter 'org_name' is set
         if ('org_name' not in params or
                 params['org_name'] is None):
             raise ValueError("Missing the required parameter `org_name` when calling `add_organization`")  # noqa: E501
-        # verify the required parameter 'contact' is set
-        if ('contact' not in params or
-                params['contact'] is None):
-            raise ValueError("Missing the required parameter `contact` when calling `add_organization`")  # noqa: E501
+        # verify the required parameter 'params' is set
+        if ('params' not in params or
+                params['params'] is None):
+            raise ValueError("Missing the required parameter `params` when calling `add_organization`")  # noqa: E501
 
         collection_formats = {}
 
@@ -311,8 +404,8 @@ class OrgApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'contact' in params:
-            body_params = params['contact']
+        if 'params' in params:
+            body_params = params['params']
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.select_header_accept(
             ['application/json'])  # noqa: E501
@@ -333,6 +426,103 @@ class OrgApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='Organization',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def add_pubkey_to_org(self, new_pubkeys, **kwargs):  # noqa: E501
+        """Add the public key specified in the body. Returns the public key with populated key ID on success.  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_pubkey_to_org(new_pubkeys, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param list[ManualAuthNParameters] new_pubkeys: (required)
+        :return: list[ManualAuthNParameters]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.add_pubkey_to_org_with_http_info(new_pubkeys, **kwargs)  # noqa: E501
+        else:
+            (data) = self.add_pubkey_to_org_with_http_info(new_pubkeys, **kwargs)  # noqa: E501
+            return data
+
+    def add_pubkey_to_org_with_http_info(self, new_pubkeys, **kwargs):  # noqa: E501
+        """Add the public key specified in the body. Returns the public key with populated key ID on success.  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_pubkey_to_org_with_http_info(new_pubkeys, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param list[ManualAuthNParameters] new_pubkeys: (required)
+        :return: list[ManualAuthNParameters]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['new_pubkeys']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method add_pubkey_to_org" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'new_pubkeys' is set
+        if ('new_pubkeys' not in params or
+                params['new_pubkeys'] is None):
+            raise ValueError("Missing the required parameter `new_pubkeys` when calling `add_pubkey_to_org`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'new_pubkeys' in params:
+            body_params = params['new_pubkeys']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/org/pubkey', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='list[ManualAuthNParameters]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=params.get('async_req'),
             _return_http_data_only=params.get('_return_http_data_only'),
@@ -534,6 +724,103 @@ class OrgApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+    def delete_id_p_from_org(self, idp_url, **kwargs):  # noqa: E501
+        """Remove the IdP specified by the url passed in the query from the org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_id_p_from_org(idp_url, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str idp_url: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_id_p_from_org_with_http_info(idp_url, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_id_p_from_org_with_http_info(idp_url, **kwargs)  # noqa: E501
+            return data
+
+    def delete_id_p_from_org_with_http_info(self, idp_url, **kwargs):  # noqa: E501
+        """Remove the IdP specified by the url passed in the query from the org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_id_p_from_org_with_http_info(idp_url, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str idp_url: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['idp_url']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_id_p_from_org" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'idp_url' is set
+        if ('idp_url' not in params or
+                params['idp_url'] is None):
+            raise ValueError("Missing the required parameter `idp_url` when calling `delete_id_p_from_org`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'idp_url' in params:
+            query_params.append(('idpUrl', params['idp_url']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/org/idp', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def delete_organization(self, org_id, **kwargs):  # noqa: E501
         """Remove an existing organization  # noqa: E501
 
@@ -617,6 +904,103 @@ class OrgApi(object):
 
         return self.api_client.call_api(
             '/org/{orgId}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def delete_pubkey_from_org(self, keyid, **kwargs):  # noqa: E501
+        """Remove the public key specified by the url passed in the query from the org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_pubkey_from_org(keyid, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str keyid: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_pubkey_from_org_with_http_info(keyid, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_pubkey_from_org_with_http_info(keyid, **kwargs)  # noqa: E501
+            return data
+
+    def delete_pubkey_from_org_with_http_info(self, keyid, **kwargs):  # noqa: E501
+        """Remove the public key specified by the url passed in the query from the org  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_pubkey_from_org_with_http_info(keyid, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str keyid: (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['keyid']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_pubkey_from_org" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'keyid' is set
+        if ('keyid' not in params or
+                params['keyid'] is None):
+            raise ValueError("Missing the required parameter `keyid` when calling `delete_pubkey_from_org`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'keyid' in params:
+            query_params.append(('keyid', params['keyid']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/org/pubkey', 'DELETE',
             path_params,
             query_params,
             header_params,
@@ -896,6 +1280,95 @@ class OrgApi(object):
 
         return self.api_client.call_api(
             '/org/key/{apikey}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='Organization',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_organization_from_token(self, **kwargs):  # noqa: E501
+        """Get an existing organization. Which org is dictated by the token presented for authentication.  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_organization_from_token(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: Organization
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_organization_from_token_with_http_info(**kwargs)  # noqa: E501
+        else:
+            (data) = self.get_organization_from_token_with_http_info(**kwargs)  # noqa: E501
+            return data
+
+    def get_organization_from_token_with_http_info(self, **kwargs):  # noqa: E501
+        """Get an existing organization. Which org is dictated by the token presented for authentication.  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_organization_from_token_with_http_info(async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :return: Organization
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = []  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_organization_from_token" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['header']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/org', 'GET',
             path_params,
             query_params,
             header_params,

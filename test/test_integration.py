@@ -19,7 +19,7 @@ def setup_params():
     test_url = os.getenv("PEACEMAKR_TEST_URL", "http://localhost:8080")
 
     # need to wait until server is setup, otherwise call to server will fail
-    time.sleep(5)
+    time.sleep(10)
 
     # set up test api_key
     configuration = Configuration()

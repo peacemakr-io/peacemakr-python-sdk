@@ -19,7 +19,7 @@ Returns 200 ok if successfully persisted
 from __future__ import print_function
 import time
 import peacemakr
-from peacemakr.generated.rest import ApiException
+from peacemakr.rest import ApiException
 from pprint import pprint
 
 # Configure API key authorization: header
@@ -29,7 +29,7 @@ configuration.api_key['authorization'] = 'YOUR_API_KEY'
 # configuration.api_key_prefix['authorization'] = 'Bearer'
 
 # create an instance of the API class
-api_instance = peacemakr.PhoneHomeApi(peacemakr.generated.ApiClient(configuration))
+api_instance = peacemakr.PhoneHomeApi(peacemakr.generated.apiClient(configuration))
 log = peacemakr.Log() # Log | 
 
 try:

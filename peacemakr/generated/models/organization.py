@@ -18,6 +18,8 @@ import six
 
 from peacemakr.generated.models.api_key import APIKey  # noqa: F401,E501
 from peacemakr.generated.models.contact import Contact  # noqa: F401,E501
+from peacemakr.generated.models.manual_auth_n_parameters import ManualAuthNParameters  # noqa: F401,E501
+from peacemakr.generated.models.oidc_auth_n_parameters import OIDCAuthNParameters  # noqa: F401,E501
 
 
 class Organization(object):
@@ -40,7 +42,10 @@ class Organization(object):
         'stripe_customer_id': 'str',
         'client_ids': 'list[str]',
         'api_keys': 'list[APIKey]',
-        'crypto_config_id': 'str'
+        'oidc_params': 'list[OIDCAuthNParameters]',
+        'manual_params': 'list[ManualAuthNParameters]',
+        'crypto_config_id': 'str',
+        'number_of_registered_clients': 'int'
     }
 
     attribute_map = {
@@ -50,10 +55,13 @@ class Organization(object):
         'stripe_customer_id': 'stripeCustomerId',
         'client_ids': 'clientIds',
         'api_keys': 'apiKeys',
-        'crypto_config_id': 'cryptoConfigId'
+        'oidc_params': 'oidcParams',
+        'manual_params': 'manualParams',
+        'crypto_config_id': 'cryptoConfigId',
+        'number_of_registered_clients': 'numberOfRegisteredClients'
     }
 
-    def __init__(self, id=None, name=None, contacts=None, stripe_customer_id=None, client_ids=None, api_keys=None, crypto_config_id=None):  # noqa: E501
+    def __init__(self, id=None, name=None, contacts=None, stripe_customer_id=None, client_ids=None, api_keys=None, oidc_params=None, manual_params=None, crypto_config_id=None, number_of_registered_clients=None):  # noqa: E501
         """Organization - a model defined in Swagger"""  # noqa: E501
 
         self._id = None
@@ -62,16 +70,26 @@ class Organization(object):
         self._stripe_customer_id = None
         self._client_ids = None
         self._api_keys = None
+        self._oidc_params = None
+        self._manual_params = None
         self._crypto_config_id = None
+        self._number_of_registered_clients = None
         self.discriminator = None
 
         self.id = id
         self.name = name
         self.contacts = contacts
-        self.stripe_customer_id = stripe_customer_id
+        if stripe_customer_id is not None:
+            self.stripe_customer_id = stripe_customer_id
         self.client_ids = client_ids
         self.api_keys = api_keys
+        if oidc_params is not None:
+            self.oidc_params = oidc_params
+        if manual_params is not None:
+            self.manual_params = manual_params
         self.crypto_config_id = crypto_config_id
+        if number_of_registered_clients is not None:
+            self.number_of_registered_clients = number_of_registered_clients
 
     @property
     def id(self):
@@ -162,8 +180,6 @@ class Organization(object):
         :param stripe_customer_id: The stripe_customer_id of this Organization.  # noqa: E501
         :type: str
         """
-        if stripe_customer_id is None:
-            raise ValueError("Invalid value for `stripe_customer_id`, must not be `None`")  # noqa: E501
 
         self._stripe_customer_id = stripe_customer_id
 
@@ -171,7 +187,7 @@ class Organization(object):
     def client_ids(self):
         """Gets the client_ids of this Organization.  # noqa: E501
 
-        Array of client id's registered to this org  # noqa: E501
+        Array of first 10 client id's registered to this org  # noqa: E501
 
         :return: The client_ids of this Organization.  # noqa: E501
         :rtype: list[str]
@@ -182,7 +198,7 @@ class Organization(object):
     def client_ids(self, client_ids):
         """Sets the client_ids of this Organization.
 
-        Array of client id's registered to this org  # noqa: E501
+        Array of first 10 client id's registered to this org  # noqa: E501
 
         :param client_ids: The client_ids of this Organization.  # noqa: E501
         :type: list[str]
@@ -218,6 +234,52 @@ class Organization(object):
         self._api_keys = api_keys
 
     @property
+    def oidc_params(self):
+        """Gets the oidc_params of this Organization.  # noqa: E501
+
+        Array of OIDC params registered to this org  # noqa: E501
+
+        :return: The oidc_params of this Organization.  # noqa: E501
+        :rtype: list[OIDCAuthNParameters]
+        """
+        return self._oidc_params
+
+    @oidc_params.setter
+    def oidc_params(self, oidc_params):
+        """Sets the oidc_params of this Organization.
+
+        Array of OIDC params registered to this org  # noqa: E501
+
+        :param oidc_params: The oidc_params of this Organization.  # noqa: E501
+        :type: list[OIDCAuthNParameters]
+        """
+
+        self._oidc_params = oidc_params
+
+    @property
+    def manual_params(self):
+        """Gets the manual_params of this Organization.  # noqa: E501
+
+        Array of manual auth params registered to this org  # noqa: E501
+
+        :return: The manual_params of this Organization.  # noqa: E501
+        :rtype: list[ManualAuthNParameters]
+        """
+        return self._manual_params
+
+    @manual_params.setter
+    def manual_params(self, manual_params):
+        """Sets the manual_params of this Organization.
+
+        Array of manual auth params registered to this org  # noqa: E501
+
+        :param manual_params: The manual_params of this Organization.  # noqa: E501
+        :type: list[ManualAuthNParameters]
+        """
+
+        self._manual_params = manual_params
+
+    @property
     def crypto_config_id(self):
         """Gets the crypto_config_id of this Organization.  # noqa: E501
 
@@ -241,6 +303,29 @@ class Organization(object):
             raise ValueError("Invalid value for `crypto_config_id`, must not be `None`")  # noqa: E501
 
         self._crypto_config_id = crypto_config_id
+
+    @property
+    def number_of_registered_clients(self):
+        """Gets the number_of_registered_clients of this Organization.  # noqa: E501
+
+        Number of registered clients to this org  # noqa: E501
+
+        :return: The number_of_registered_clients of this Organization.  # noqa: E501
+        :rtype: int
+        """
+        return self._number_of_registered_clients
+
+    @number_of_registered_clients.setter
+    def number_of_registered_clients(self, number_of_registered_clients):
+        """Sets the number_of_registered_clients of this Organization.
+
+        Number of registered clients to this org  # noqa: E501
+
+        :param number_of_registered_clients: The number_of_registered_clients of this Organization.  # noqa: E501
+        :type: int
+        """
+
+        self._number_of_registered_clients = number_of_registered_clients
 
     def to_dict(self):
         """Returns the model properties as a dict"""
