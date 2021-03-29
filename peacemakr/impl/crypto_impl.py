@@ -34,6 +34,7 @@ import peacemakr_core_crypto_python as p
 
 from random import randint
 from functools import reduce
+from urllib3.exceptions import MaxRetryError
 import logging
 import time
 import json
@@ -86,6 +87,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__loaded_private_preferred_key = None
         self.__loaded_private_preferred_cipher = None
         self.__crypto_context = p.CryptoContext()
+        self.__can_reach_cloud = self.__check_can_reach_cloud()
 
         self.__last_updated_time = None
         self.__sym_key_cache = dict()
@@ -95,13 +97,17 @@ class CryptoImpl(PeacemakrCryptoSDK):
         self.__loaded_private_preferred_key = p.Key(DEFAULT_SYMM_CIPHER, self.persister.load(PERSISTER_PRIV_KEY), True)
 
     def __is_registered(self) -> bool:
-        return  self.persister.exists(PERSISTER_PREFERRED_KEYID)\
+        persister_has_data = self.persister.exists(PERSISTER_PREFERRED_KEYID)\
             and self.persister.exists(PERSISTER_CLIENTID_KEY)\
             and self.persister.exists(PERSISTER_PRIV_KEY)\
             and self.persister.exists(PERSISTER_PUB_KEY)\
             and self.persister.exists(PERSISTER_ASYM_TYPE) \
             and self.persister.exists(PERSISTER_ORG) \
-            and self.persister.exists(PERSISTER_CRYPTO_CONFIG) \
+            and self.persister.exists(PERSISTER_CRYPTO_CONFIG)
+        if not self.__can_reach_cloud:
+            return persister_has_data
+
+        return  persister_has_data\
             and self.__loaded_private_preferred_key is not None \
             and self.__loaded_private_preferred_cipher is not None
 
@@ -109,14 +115,19 @@ class CryptoImpl(PeacemakrCryptoSDK):
         # Try to get it from the persister, if it exists
         self.org = self.persister.load(PERSISTER_ORG)
         self.crypto_config = self.persister.load(PERSISTER_CRYPTO_CONFIG)
-        return self.org is not None and self.crypto_config is not None and self.__client is not None
+        has_org_and_crypto_config = self.org is not None and self.crypto_config is not None
+        if not self.__can_reach_cloud:
+            return has_org_and_crypto_config
+        return has_org_and_crypto_config and self.__client is not None
 
-    def __can_reach_cloud(self) -> bool:
+    def __check_can_reach_cloud(self) -> bool:
         server_api = ServerManagementApi(api_client=self.__get_client())
         try:
             server_api.health_get()
         except ApiException:
             # Silently swallow the health exception and just return
+            return False
+        except MaxRetryError as mre:
             return False
         return True
 
@@ -124,7 +135,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         ''' Update the config if program elasped more than `max_elasped_ti
             If the client is offline, then assume the local state is valid
         '''
-        if not self.__can_reach_cloud():
+        if not self.__check_can_reach_cloud():
             return
         now = time.time()
         if (now - self.__last_updated_time) > max_elasped_time:
@@ -431,11 +442,20 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def register(self):
+        # self.__can_reach_cloud = self.__check_can_reach_cloud()
         # check is register and is boostrap, if not initialize
         if self.__is_registered():
             if not self.__is_bootstrapped():
+                if not self.__can_reach_cloud:
+                    self.logger.error("User is registered but no local keys saved to run in offline mode")
+                    return
                 self.__do_bootstrap_org_and_crypto_config()
+            self.__bootsrapped_private_preferred_key_and_cipher()
             self.logger.info("User is registered and boostrapped already")
+            return
+
+        if not self.__can_reach_cloud:
+            self.logger.error("Register failed. No local keys saved to run in offline mode")
             return
 
         self.__do_bootstrap_org_and_crypto_config()
@@ -464,6 +484,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
     def sync(self):
         self.__verify_bootstrapped_and_registered()
+        if not self.__can_reach_cloud:
+            self.logger.info("No sync in offline mode")
+            return
         crypto_config_api = CryptoConfigApi(self.__get_client())
 
         try:
@@ -479,7 +502,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __domain_is_valid_for_encryption(self, domain: SymmetricKeyUseDomain) -> bool:
         assert isinstance(domain, SymmetricKeyUseDomain)
         now_in_seconds = int(round(time.time()))
-        if not self.__can_reach_cloud():
+        if not self.__check_can_reach_cloud():
             return domain.creation_time + domain.symmetric_key_encryption_use_ttl > now_in_seconds \
                    >= domain.creation_time + domain.symmetric_key_inception_ttl
         return domain.symmetric_key_encryption_allowed
@@ -512,6 +535,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
         if self.persister.exists(key_id):
             return self.persister.load(key_id)
+
+        if not self.__can_reach_cloud:
+            raise FailedToDownloadKeyError('KeyID: {}'.format(key_id))
 
         self.__download_and_save_all_keys([key_id])
         if not self.persister.exists(key_id):
@@ -591,7 +617,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __domain_is_valid_for_decryption(self, domain: SymmetricKeyUseDomain) -> bool:
         assert isinstance(domain, SymmetricKeyUseDomain)
         now_in_seconds = int(round(time.time()))
-        if not self.__can_reach_cloud():
+        if not self.__can_reach_cloud:
             return domain.creation_time + domain.symmetric_key_decryption_use_ttl > now_in_seconds
         return domain.symmetric_key_decryption_allowed
 

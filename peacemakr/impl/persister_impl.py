@@ -1,5 +1,7 @@
 import os
 import pickle
+import codecs
+
 from peacemakr.persister_base import Persister
 
 class InMemoryPersister(Persister):
@@ -21,30 +23,47 @@ class InMemoryPersister(Persister):
     def key_nums(self):
         return len(self.__persister.keys())
 
-    class DiskPersister(Persister):
-        def __init__(self, prefix: str):
-            self.__persister = {}
-            self.__prefix = prefix
+class DiskPersister(Persister):
+    def __init__(self, prefix: str):
+        self.__persister = {}
+        self.__prefix = prefix
 
-        def save(self, key, value):
-            # Store the value in the hot cache, but also write it to disk
-            self.__persister[key] = value
-            path = os.path.join(self.__prefix, key)
-            with open(path, "w+") as f:
-                f.write(pickle.dumps(value))
+    def save(self, key, value):
+        # Store the value in the hot cache, but also write it to disk
+        self.__persister[key] = value
+        # TODO: Fix this
+        # this is a hack to make sure we can save key_id (ex: z981l+Sak/jALkdlzjksl..) by subsituting '/' with '_'
+        # if key_id has '/', it will cause file creation error
+        key = key.replace('/', '_')
+        path = os.path.join(self.__prefix, key)
+        with open(path, "wb+") as f:
+            # print(pickle.dumps(value, 0))
+            # f.write(pickle.dumps(value).decode())
+            pickle.dump(value, f, protocol=0)
 
-        def load(self, key):
-            # If the value is in the cache, then return it
-            if key in self.__persister:
-                return self.__persister[key]
-            path = os.path.join(self.__prefix, key)
-            if not os.path.isfile(path):
-                # We don't have this object
+    def load(self, key):
+        # If the value is in the cache, then return it
+        if key in self.__persister:
+            return self.__persister[key]
+        # TODO: Fix this
+        # this is a hack to make sure we can save key_id (ex: z981l+Sak/jALkdlzjksl..) by subsituting '/' with '_'
+        # if key_id has '/', it will cause file creation error
+        key = key.replace('/', '_')
+        path = os.path.join(self.__prefix, key)
+        if not os.path.isfile(path):
+            # We don't have this object
+            return None
+        # Read the file and return its contents
+        with open(path, "rb") as f:
+            try:
+                return pickle.load(f) #pickle.loads(codecs.decode(f.read().encode(), "base64"))
+            except EOFError:
                 return None
-            # Read the file and return its contents
-            with open(path, "r") as f:
-                return pickle.loads(f.read())
 
-        def exists(self, key):
-            path = os.path.join(self.__prefix, key)
-            return key in self.__persister or os.path.isfile(path)
+    def exists(self, key):
+        # TODO: Fix this
+        # this is a hack to make sure we can save key_id (ex: z981l+Sak/jALkdlzjksl..) by subsituting '/' with '_'
+        # if key_id has '/', it will cause file creation error
+        key = key.replace('/', '_')
+        path = os.path.join(self.__prefix, key)
+        return key in self.__persister or os.path.isfile(path)
