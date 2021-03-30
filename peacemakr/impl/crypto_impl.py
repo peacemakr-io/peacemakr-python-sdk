@@ -507,9 +507,18 @@ class CryptoImpl(PeacemakrCryptoSDK):
                    >= domain.creation_time + domain.symmetric_key_inception_ttl
         return domain.symmetric_key_encryption_allowed
 
+    def __domain_has_key_persisted(self, domain) -> bool:
+        for key_id in domain.encryption_key_ids:
+            if not self.persister.exists(key_id):
+                return False
+        return True
+
     def __select_use_domain_name(self) -> str:
         domains = self.crypto_config.symmetric_key_use_domains
         valid_for_encryption = [d for d in domains if self.__domain_is_valid_for_encryption(d)]
+        if not self.__can_reach_cloud:
+            persisted_use_domains = [d for d in valid_for_encryption if self.__domain_has_key_persisted(d)]
+            return random_index(persisted_use_domains) if persisted_use_domains else None
         return random_index(valid_for_encryption) if valid_for_encryption else None
 
     def __get_valid_use_domain_for_encryption(self, use_domain_name: str) -> SymmetricKeyUseDomain:
@@ -533,8 +542,9 @@ class CryptoImpl(PeacemakrCryptoSDK):
         if key_id in self.__sym_key_cache:
             return self.__sym_key_cache[key_id]
 
-        if self.persister.exists(key_id):
-            return self.persister.load(key_id)
+        key = self.persister.load(key_id)
+        if key is not None:
+            return key
 
         if not self.__can_reach_cloud:
             raise FailedToDownloadKeyError('KeyID: {}'.format(key_id))
