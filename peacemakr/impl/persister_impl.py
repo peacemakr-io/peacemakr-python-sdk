@@ -1,6 +1,5 @@
 import os
 import pickle
-import codecs
 
 from peacemakr.persister_base import Persister
 
@@ -40,8 +39,6 @@ class DiskPersister(Persister):
         key = key.replace('/', '_')
         path = os.path.join(self.__prefix, key)
         with open(path, "wb+") as f:
-            # print(pickle.dumps(value, 0))
-            # f.write(pickle.dumps(value).decode())
             pickle.dump(value, f, protocol=0)
 
     def load(self, key):
@@ -59,7 +56,7 @@ class DiskPersister(Persister):
         # Read the file and return its contents
         with open(path, "rb") as f:
             try:
-                return pickle.load(f) #pickle.loads(codecs.decode(f.read().encode(), "base64"))
+                return pickle.load(f)
             except EOFError:
                 return None
 
