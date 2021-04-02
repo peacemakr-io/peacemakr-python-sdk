@@ -135,7 +135,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
         ''' Update the config if program elasped more than `max_elasped_ti
             If the client is offline, then assume the local state is valid
         '''
-        if not self.__check_can_reach_cloud():
+        if not self.__can_reach_cloud:
             return
         now = time.time()
         if (now - self.__last_updated_time) > max_elasped_time:
