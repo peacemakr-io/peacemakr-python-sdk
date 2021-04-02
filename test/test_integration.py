@@ -14,7 +14,7 @@ from base64 import b64encode
 # set up
 @pytest.fixture
 def setup_params():
-    
+
     # set up test address
     test_url = os.getenv("PEACEMAKR_TEST_URL", "http://localhost:8080")
 
@@ -107,11 +107,7 @@ def test_encrypt_decrypt_string(setup_params):
 
 def test_disk_persister(setup_params):
     path = "/tmp/peacemakr"
-
-    try:
-        os.mkdir(path)
-    except OSError as ose:
-        self.fail("Failed with %s" % str(ose))
+    os.mkdir(path)
 
     persister = DiskPersister(path)
     sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"],
@@ -136,5 +132,7 @@ def test_disk_persister(setup_params):
     # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
     assert(decrypted_text == plain_text.encode())
+
+    os.rmdir(path)
 
 
