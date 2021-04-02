@@ -132,7 +132,3 @@ def test_disk_persister(setup_params):
     # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
     assert(decrypted_text == plain_text.encode())
-
-    os.rmdir(path)
-
-
