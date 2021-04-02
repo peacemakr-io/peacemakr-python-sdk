@@ -442,12 +442,11 @@ class CryptoImpl(PeacemakrCryptoSDK):
 
 
     def register(self):
-        # self.__can_reach_cloud = self.__check_can_reach_cloud()
         # check is register and is boostrap, if not initialize
         if self.__is_registered():
             if not self.__is_bootstrapped():
                 if not self.__can_reach_cloud:
-                    self.logger.error("User is registered but no local keys saved to run in offline mode")
+                    self.logger.error("User is registered but no org and cryptoconfig are saved to run in offline mode")
                     return
                 self.__do_bootstrap_org_and_crypto_config()
             self.__bootsrapped_private_preferred_key_and_cipher()
@@ -502,7 +501,7 @@ class CryptoImpl(PeacemakrCryptoSDK):
     def __domain_is_valid_for_encryption(self, domain: SymmetricKeyUseDomain) -> bool:
         assert isinstance(domain, SymmetricKeyUseDomain)
         now_in_seconds = int(round(time.time()))
-        if not self.__check_can_reach_cloud():
+        if not self.__can_reach_cloud:
             return domain.creation_time + domain.symmetric_key_encryption_use_ttl > now_in_seconds \
                    >= domain.creation_time + domain.symmetric_key_inception_ttl
         return domain.symmetric_key_encryption_allowed
