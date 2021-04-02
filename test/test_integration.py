@@ -106,8 +106,6 @@ def test_encrypt_decrypt_string(setup_params):
     assert(decrypted_text == plain_text.encode())
 
 def test_disk_persister(setup_params):
-    import os
-    # define the name of the directory to be created
     path = "/tmp/peacemakr"
 
     try:

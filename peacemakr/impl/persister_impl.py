@@ -28,6 +28,9 @@ class DiskPersister(Persister):
         self.__persister = {}
         self.__prefix = prefix
 
+    def key_nums(self):
+        return len(self.__persister.keys())
+
     def save(self, key, value):
         # Store the value in the hot cache, but also write it to disk
         self.__persister[key] = value
