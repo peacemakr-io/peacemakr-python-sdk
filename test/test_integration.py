@@ -3,7 +3,7 @@ from peacemakr.generated.api_client import ApiClient
 from peacemakr.generated.configuration import Configuration
 from peacemakr.generated.api.org_api import OrgApi
 import peacemakr.factory as Factory
-from peacemakr.impl.persister_impl import InMemoryPersister
+from peacemakr.impl.persister_impl import InMemoryPersister, DiskPersister
 
 import os
 import random
@@ -104,3 +104,39 @@ def test_encrypt_decrypt_string(setup_params):
     # ouptut is bytes
     decrypted_text = sdk.decrypt(encrypted_text)
     assert(decrypted_text == plain_text.encode())
+
+def test_disk_persister(setup_params):
+    import os
+    # define the name of the directory to be created
+    path = "/tmp/peacemakr"
+
+    try:
+        os.mkdir(path)
+    except OSError as ose:
+        self.fail("Failed with %s" % str(ose))
+
+    persister = DiskPersister(path)
+    sdk = Factory.get_crypto_sdk(api_key=setup_params["api_key"],
+                                 client_name="test_encrypt_decrypt_string",
+                                 peacemakr_hostname=setup_params["test_url"],
+                                 persister=persister)
+    sdk.register()
+
+    # sleep to wait for keys to be generated in server
+    time.sleep(2)
+    sdk.sync()
+
+    num_clients = persister.key_nums()
+    assert(num_clients != 0)
+
+    N = random.randint(0,1000)
+    plain_text = ''.join(random.choices(string.printable, k=N))
+
+    encrypted_text = sdk.encrypt(plain_text.encode())
+    assert(plain_text != encrypted_text)
+
+    # ouptut is bytes
+    decrypted_text = sdk.decrypt(encrypted_text)
+    assert(decrypted_text == plain_text.encode())
+
+
