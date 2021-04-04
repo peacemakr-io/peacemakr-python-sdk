@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-    <img src="https://admin.peacemakr.io/images/PeacemakrP-Golden.png" width="150"/>
+    <img src="https://admin.peacemakr.io/p_logo.png" width="150"/>
   <br>
 </p>
 
@@ -8,9 +8,17 @@
 
 ![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/Build%20%26%20Test/badge.svg)
 
-Peacemakr's E2E-Encryption-as-a-Service SDK solves all the hard problem of E2E-Encryption, and provides consistent solution with a simple interface.
+Peacemakr's E2E-Encryption-as-a-Service SDK simplify your data security with E2E-Encryption service and automated key lifecycle management.
+
+You can easily encrypt your data without worrying about backward compatibility, cross platform portability, or changing security requirements.
+
+Our Zero-Trust capability allows you to customize your security strength to meet the highest standard without having to place your trust in Peacemakr as we don’t have the capacity to get your keys and decrypt your data.
 
 We take security and trust very seriously. If you believe you have found a security issue, please responsibly disclose by [contacting us](mailto:security@peacemakr.io).
+
+## License
+
+The content of this SDK is open source under [Apache License 2.0](https://github.com/peacemakr-io/peacemakr-python-sdk/blob/master/LICENSE).
 
 ## Documentation
 
