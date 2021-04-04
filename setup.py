@@ -23,7 +23,7 @@ import shutil
 import platform
 
 NAME = "peacemakr"
-VERSION = "0.0.2"
+VERSION = "0.1.0"
 
 # To install the library, run the following
 #
