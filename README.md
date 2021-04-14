@@ -8,7 +8,7 @@
 
 ![Build Status](https://github.com/peacemakr-io/peacemakr-python-sdk/workflows/Build%20%26%20Test/badge.svg)
 
-Peacemakr's E2E-Encryption-as-a-Service SDK simplify your data security with E2E-Encryption service and automated key lifecycle management.
+Peacemakr's E2E-Encryption-as-a-Service SDK simplifies your data security with E2E-Encryption service and automated key lifecycle management.
 
 You can easily encrypt your data without worrying about backward compatibility, cross platform portability, or changing security requirements.
 
