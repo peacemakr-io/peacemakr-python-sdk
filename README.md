@@ -98,3 +98,4 @@ Issues:
 
 PRs:
 - All PRs must be reviewed and pass CI
+- New functionality must include new tests
